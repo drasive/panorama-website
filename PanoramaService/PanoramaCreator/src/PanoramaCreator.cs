@@ -28,14 +28,14 @@ namespace DimitriVranken.PanoramaCreator
             // TODO: Set rotation distance
 
             // Take images
-            for (var imageIndex = 0; imageIndex < imageCount; imageIndex++)
+            for (var imageIndex = 1; imageIndex <= imageCount; imageIndex++)
             {
                 var fileName = String.Format("image_{0}.jpg", imageIndex);
                 var destinationFile = Path.Combine(destinationFolder, fileName);
 
                 camera.TakeImage(destinationFile);
-                // Don't rotate after the last image was taken
-                if (imageIndex < imageCount - 1)
+                // Don't rotate anymore after the last image was taken
+                if (imageIndex < imageCount)
                 {
                     camera.Rotate(CameraDirection.Right);
                 }
