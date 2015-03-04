@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="src\CameraDirection.cs" />
     <Compile Include="src\CameraControl.cs" />
+    <Compile Include="src\Common.cs" />
     <Compile Include="src\PanoramaCreator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

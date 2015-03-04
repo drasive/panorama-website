@@ -6,15 +6,27 @@ namespace DimitriVranken.PanoramaCreator
 {
     class CameraControl
     {
+        // TODO: Add logging
+
         const string UrlProtocol = "http://";
         const string UrlFolder = "/cgi-bin/";
         const string UrlRotationCommand = "camctrl.cgi?move=";
         const string UrlImageCommand = "video.jpg";
 
 
+        public IPAddress CameraIpAddress { get; private set; }
+
+
+        public CameraControl(IPAddress cameraIpAddress)
+        {
+            CameraIpAddress = cameraIpAddress;
+        }
+
+
         private HttpWebResponse ExecuteCommand(string commandUrl)
         {
-            var request = WebRequest.Create(UrlProtocol + UrlFolder + commandUrl);
+            var requestUrl = UrlProtocol + CameraIpAddress + UrlFolder + commandUrl;
+            var request = WebRequest.Create(requestUrl);
             return (HttpWebResponse)request.GetResponse();
         }
 
@@ -88,7 +100,7 @@ namespace DimitriVranken.PanoramaCreator
                     commandUrl += "right";
                     break;
                 default:
-                    throw new ArgumentException("Unknown enum parameter encountered.");
+                    throw new ArgumentException("Unknown enum value encountered.");
 
             }
 
