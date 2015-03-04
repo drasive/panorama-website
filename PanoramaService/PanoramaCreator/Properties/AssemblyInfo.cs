@@ -2,8 +2,8 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("PanoramaCreator")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyDescription("https://github.com/drasive/panorama-website")]
+[assembly: AssemblyCompany("Dimitri Vranken")]
 [assembly: AssemblyProduct("PanoramaCreator")]
 [assembly: AssemblyCopyright("Copyright © Dimitri Vranken 2015")]
 
