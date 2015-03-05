@@ -2,8 +2,10 @@
 using System.IO;
 using System.Net;
 
-namespace DimitriVranken.PanoramaCreator {
-    class CameraControl {
+namespace DimitriVranken.PanoramaCreator
+{
+    class CameraControl
+    {
         // TODO: Add logging
 
         const string UrlProtocol = "http://";
@@ -15,12 +17,14 @@ namespace DimitriVranken.PanoramaCreator {
         public IPAddress CameraIpAddress { get; private set; }
 
 
-        public CameraControl(IPAddress cameraIpAddress) {
+        public CameraControl(IPAddress cameraIpAddress)
+        {
             CameraIpAddress = cameraIpAddress;
         }
 
 
-        private HttpWebResponse ExecuteCommand(string commandUrl) {
+        private HttpWebResponse ExecuteCommand(string commandUrl)
+        {
 #if DEBUG
             return null;
 #endif
@@ -33,7 +37,8 @@ namespace DimitriVranken.PanoramaCreator {
             return (HttpWebResponse)request.GetResponse();
         }
 
-        private bool ExecuteCommand(string commandUrl, string destinationFile) {
+        private bool ExecuteCommand(string commandUrl, string destinationFile)
+        {
 #if DEBUG
             return false;
 #endif
@@ -72,8 +77,10 @@ namespace DimitriVranken.PanoramaCreator {
         }
 
 
-        public void TakeImage(string destinationFile) {
-            if (string.IsNullOrEmpty(destinationFile)) {
+        public void TakeImage(string destinationFile)
+        {
+            if (string.IsNullOrEmpty(destinationFile))
+            {
                 throw new ArgumentNullException("destinationFile");
             }
 
@@ -84,10 +91,12 @@ namespace DimitriVranken.PanoramaCreator {
             ExecuteCommand(commandUrl, destinationFile);
         }
 
-        public void Rotate(CameraDirection direction) {
+        public void Rotate(CameraDirection direction)
+        {
             // Build command URL
             var commandUrl = UrlRotationCommand;
-            switch (direction) {
+            switch (direction)
+            {
                 case CameraDirection.Home:
                     commandUrl += "home";
                     break;

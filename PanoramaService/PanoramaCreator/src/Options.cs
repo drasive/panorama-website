@@ -1,8 +1,10 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 
-namespace DimitriVranken.PanoramaCreator {
-    class Options {
+namespace DimitriVranken.PanoramaCreator
+{
+    class Options
+    {
         [ParserState]
         public IParserState LastParserState { get; set; }
 
@@ -24,7 +26,8 @@ namespace DimitriVranken.PanoramaCreator {
 
 
         [HelpOption]
-        public string GetUsage() {
+        public string GetUsage()
+        {
             // Build an automatic help and error message
             return HelpText.AutoBuild(this, (current) => HelpText.DefaultParsingErrorsHandler(this, current));
         }

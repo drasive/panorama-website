@@ -4,15 +4,20 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 
-namespace DimitriVranken.PanoramaCreator {
-    static class PanoramaCreator {
+namespace DimitriVranken.PanoramaCreator
+{
+    static class PanoramaCreator
+    {
         static readonly Options Options = new Options();
         static IPAddress _ipAddress;
         static FileInfo _outputFile;
 
-        static void Main(string[] args) {
-            try {
-                if (!ParseOptions(args)) {
+        static void Main(string[] args)
+        {
+            try
+            {
+                if (!ParseOptions(args))
+                {
                     Environment.Exit(1);
                 }
 
@@ -30,7 +35,8 @@ namespace DimitriVranken.PanoramaCreator {
                 Console.WriteLine();
 
                 var imageFiles = new List<string>();
-                for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++) {
+                for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
+                {
                     // Take image
                     var imageFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".jpg");
                     imageFiles.Add(imageFile);
@@ -39,7 +45,8 @@ namespace DimitriVranken.PanoramaCreator {
                     camera.TakeImage(imageFile);
 
                     // Rotate camera (not after the last image was taken)
-                    if (imageIndex < Options.ImageCount) {
+                    if (imageIndex < Options.ImageCount)
+                    {
                         Logger.UserInterface.Debug("Rotating the camera to the right.");
                         camera.Rotate(CameraDirection.Right);
                     }
@@ -52,13 +59,15 @@ namespace DimitriVranken.PanoramaCreator {
 
                 // Delete temporary files
                 Logger.UserInterface.Debug("Deleting temporary files");
-                foreach (var imageFile in imageFiles) {
+                foreach (var imageFile in imageFiles)
+                {
                     Common.TryDeleteFile(imageFile);
                 }
 
                 Console.ReadLine();
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 // TODO: handle
                 Logger.UserInterface.Fatal("A fatal error occurred. See the log file for more information.");
                 Logger.Default.Fatal("Fatal error", exception);
@@ -68,7 +77,8 @@ namespace DimitriVranken.PanoramaCreator {
         }
 
 
-        private static bool ParseOptions(string[] options) {
+        private static bool ParseOptions(string[] options)
+        {
             // Parse options
             CommandLine.Parser.Default.ParseArgumentsStrict(options, Options);
 
@@ -84,13 +94,15 @@ namespace DimitriVranken.PanoramaCreator {
             // Validate options
             var optionInvalid = false;
 
-            if (!IPAddress.TryParse(Options.IpAddress, out _ipAddress)) {
+            if (!IPAddress.TryParse(Options.IpAddress, out _ipAddress))
+            {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The specified ip-address is invalid.");
             }
 
             _outputFile = new FileInfo(Options.Output);
-            if (Options.Force == false && _outputFile.Exists) {
+            if (Options.Force == false && _outputFile.Exists)
+            {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite.");
             }
@@ -99,11 +111,13 @@ namespace DimitriVranken.PanoramaCreator {
 
             const int minimumImageCount = 1;
             const int maximumImageCount = 5;
-            if (Options.ImageCount < 1) {
+            if (Options.ImageCount < 1)
+            {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The image-count may not be lower than {0}", minimumImageCount);
             }
-            else if (Options.ImageCount > 5) {
+            else if (Options.ImageCount > 5)
+            {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
             }
@@ -115,7 +129,8 @@ namespace DimitriVranken.PanoramaCreator {
             return !optionInvalid;
         }
 
-        private static void PrintHeading() {
+        private static void PrintHeading()
+        {
             var assemblyInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
             Console.WriteLine("{0} {1}", assemblyInfo.ProductName, assemblyInfo.ProductVersion);
             Console.WriteLine("{0}", assemblyInfo.LegalCopyright);
