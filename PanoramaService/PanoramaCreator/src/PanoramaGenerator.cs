@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -10,12 +9,42 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaGenerator
     {
+        private static Bitmap ChangeImageResolution(Image image, decimal scalingFactor)
+        {
+            return new Bitmap(image, (int)(image.Width * scalingFactor), (int)(image.Height * scalingFactor));
+        }
+
+        private static Bitmap ReduceImageResolution(Bitmap image, int maximumResolution)
+        {
+            if (image.Width < maximumResolution && image.Height < maximumResolution)
+            {
+                return image;
+            }
+
+            decimal scalingFactor;
+            if (image.Height > image.Width)
+            {
+                scalingFactor = (decimal)maximumResolution / image.Height;
+            }
+            else
+            {
+                scalingFactor = (decimal)maximumResolution / image.Width;
+            }
+
+            return ChangeImageResolution(image, scalingFactor);
+        }
+
         private static Bitmap MergeImages(Bitmap image1, Bitmap image2)
         {
+            // TODO: Move resolution change to GeneratePanoramicImage
+            const int maximumResolution = 15000; //1920
+            var image1LowResolution = ReduceImageResolution(image1, maximumResolution);
+            var image2LowResolution = ReduceImageResolution(image2, maximumResolution);
+
             // Detect feature points using Surf Corners Detector
             var featureDetector = new SpeededUpRobustFeaturesDetector();
-            var featurePoints1 = featureDetector.ProcessImage(image1).ToArray();
-            var featurePoints2 = featureDetector.ProcessImage(image2).ToArray();
+            var featurePoints1 = featureDetector.ProcessImage(image1LowResolution).ToArray();
+            var featurePoints2 = featureDetector.ProcessImage(image2LowResolution).ToArray();
 
             // Match feature points using a k-NN
             var featureMatcher = new KNearestNeighborMatching(5);
@@ -29,8 +58,15 @@ namespace DimitriVranken.PanoramaCreator
             var homography = homographyEstimator.Estimate(correlationPoints1, correlationPoints2);
 
             // Blend the second image using the homography
-            var blend = new Blend(homography, image1);
-            return blend.Apply(image2);
+            var blend = new Blend(homography, image1LowResolution);
+            var mergedImage = blend.Apply(image2LowResolution);
+
+            // Dispose bitmaps
+            image1LowResolution.Dispose();
+            image2LowResolution.Dispose();
+
+            // Return
+            return mergedImage;
         }
 
 

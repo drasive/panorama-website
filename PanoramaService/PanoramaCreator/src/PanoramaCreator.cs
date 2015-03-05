@@ -32,14 +32,15 @@ namespace DimitriVranken.PanoramaCreator
                 // Capture images
                 var imageFiles = TakeImages();
 #if DEBUG
-                imageFiles = new List<string>()
+                imageFiles.Clear();
+                for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
                 {
-                    @"C:\temp\img1.jpg", @"C:\temp\img2.jpg"
-                };
+                    imageFiles.Add(String.Format(@"C:\temp\img{0}.jpg", imageFileIndex));
+                }
 #endif
 
                 // Generate panoramic image
-                CreatePanoramicImage(imageFiles);
+                GeneratePanoramicImage(imageFiles);
 
 
 #if DEBUG
@@ -131,7 +132,7 @@ namespace DimitriVranken.PanoramaCreator
             Console.WriteLine();
         }
 
-        private static IEnumerable<string> TakeImages()
+        private static List<string> TakeImages()
         {
             Console.WriteLine();
 
@@ -162,7 +163,7 @@ namespace DimitriVranken.PanoramaCreator
             return imageFiles;
         }
 
-        private static void CreatePanoramicImage(IEnumerable<string> imageFiles)
+        private static void GeneratePanoramicImage(IEnumerable<string> imageFiles)
         {
             Console.WriteLine();
 
