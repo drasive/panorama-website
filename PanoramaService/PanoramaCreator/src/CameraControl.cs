@@ -6,7 +6,7 @@ namespace DimitriVranken.PanoramaCreator
 {
     class CameraControl
     {
-        // TODO: Add logging
+        // TODO: Test
 
         const string UrlProtocol = "http://";
         const string UrlFolder = "/cgi-bin/";
@@ -52,19 +52,17 @@ namespace DimitriVranken.PanoramaCreator
             {
                 // Download the response to a file
                 using (var inputStream = response.GetResponseStream())
+                using (var outputStream = File.OpenWrite(destinationFile))
                 {
-                    using (var outputStream = File.OpenWrite(destinationFile))
-                    {
-                        var buffer = new byte[4096];
-                        int bytesRead;
+                    var buffer = new byte[4096];
+                    int bytesRead;
 
-                        do
-                        {
-                            bytesRead = inputStream.Read(buffer, 0, buffer.Length);
-                            outputStream.Write(buffer, 0, bytesRead);
-                        } while (bytesRead != 0);
-                        Logger.Default.Error("Camera: Downloaded response of command '{0}'", commandUrl);
-                    }
+                    do
+                    {
+                        bytesRead = inputStream.Read(buffer, 0, buffer.Length);
+                        outputStream.Write(buffer, 0, bytesRead);
+                    } while (bytesRead != 0);
+                    Logger.Default.Error("Camera: Downloaded response of command '{0}'", commandUrl);
                 }
 
                 // The file was downloaded successfully

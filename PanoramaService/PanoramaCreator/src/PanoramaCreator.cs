@@ -16,61 +16,54 @@ namespace DimitriVranken.PanoramaCreator
         {
             try
             {
+                var stopwatch = Stopwatch.StartNew();
+
+                // Parse parameters
                 if (!ParseOptions(args))
                 {
                     Environment.Exit(1);
                 }
 
+
+                // Print info
                 PrintHeading();
                 Console.WriteLine("Camera IP address: {0}", _ipAddress);
 
-                // Setup
-                Common.CheckDirectory(_outputFile.Directory.FullName);
-
-                var camera = new CameraControl(_ipAddress);
-                camera.Rotate(CameraDirection.Home);
-                // TODO: Set rotation distance
-
-                // Take images
-                Console.WriteLine();
-
-                var imageFiles = new List<string>();
-                for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
+                // Capture images
+                var imageFiles = TakeImages();
+#if DEBUG
+                imageFiles = new List<string>()
                 {
-                    // Take image
-                    var imageFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".jpg");
-                    imageFiles.Add(imageFile);
+                    @"C:\temp\img1.jpg", @"C:\temp\img2.jpg"
+                };
+#endif
 
-                    Logger.UserInterface.Info("Taking picture {0}/{1}.", imageIndex, Options.ImageCount);
-                    camera.TakeImage(imageFile);
+                // Generate panoramic image
+                CreatePanoramicImage(imageFiles);
 
-                    // Rotate camera (not after the last image was taken)
-                    if (imageIndex < Options.ImageCount)
-                    {
-                        Logger.UserInterface.Debug("Rotating the camera to the right.");
-                        camera.Rotate(CameraDirection.Right);
-                    }
-                }
 
-                // Create panorama
-                Console.WriteLine();
-
-                // TODO:
-
+#if DEBUG
+#else
                 // Delete temporary files
                 Logger.UserInterface.Debug("Deleting temporary files");
                 foreach (var imageFile in imageFiles)
                 {
                     Common.TryDeleteFile(imageFile);
                 }
+#endif
 
+                // Print done
+                stopwatch.Stop();
+                var executionTime = Math.Round((decimal)stopwatch.ElapsedMilliseconds / 1000, 2);
+                Console.WriteLine("Done ({0} seconds)", executionTime);
+#if DEBUG
                 Console.ReadLine();
+#endif
             }
             catch (Exception exception)
             {
-                // TODO: handle
                 Logger.UserInterface.Fatal("A fatal error occurred. See the log file for more information.");
-                Logger.Default.Fatal("Fatal error", exception);
+                Logger.Default.FatalException("", exception);
 
                 Environment.Exit(1);
             }
@@ -110,13 +103,13 @@ namespace DimitriVranken.PanoramaCreator
             // "force" doesn't need to be validated
 
             const int minimumImageCount = 1;
-            const int maximumImageCount = 5;
-            if (Options.ImageCount < 1)
+            const int maximumImageCount = 10;
+            if (Options.ImageCount < minimumImageCount)
             {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The image-count may not be lower than {0}", minimumImageCount);
             }
-            else if (Options.ImageCount > 5)
+            else if (Options.ImageCount > maximumImageCount)
             {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
@@ -136,6 +129,45 @@ namespace DimitriVranken.PanoramaCreator
             Console.WriteLine("{0}", assemblyInfo.LegalCopyright);
 
             Console.WriteLine();
+        }
+
+        private static IEnumerable<string> TakeImages()
+        {
+            Console.WriteLine();
+
+            // Setup camera
+            var camera = new CameraControl(_ipAddress);
+            camera.Rotate(CameraDirection.Home);
+            // TODO: Set rotation distance
+
+            // Take images
+            var imageFiles = new List<string>();
+            for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
+            {
+                // Take image
+                var imageFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".jpg");
+                imageFiles.Add(imageFile);
+
+                Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, Options.ImageCount);
+                camera.TakeImage(imageFile);
+
+                // Rotate camera (not after the last image was taken)
+                if (imageIndex < Options.ImageCount)
+                {
+                    Logger.UserInterface.Debug("Rotating the camera to the right.");
+                    camera.Rotate(CameraDirection.Right);
+                }
+            }
+
+            return imageFiles;
+        }
+
+        private static void CreatePanoramicImage(IEnumerable<string> imageFiles)
+        {
+            Console.WriteLine();
+
+            Common.CheckDirectory(_outputFile.Directory.FullName);
+            PanoramaGenerator.GeneratePanoramicImage(imageFiles, _outputFile.FullName);
         }
     }
 }
