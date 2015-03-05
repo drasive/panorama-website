@@ -13,6 +13,9 @@ namespace DimitriVranken.PanoramaCreator {
         [Option('o', "output", Required = true, HelpText = "The file to output the panoramic image to.")]
         public string Output { get; set; }
 
+        [Option('f', "force", DefaultValue = false, HelpText = "Force an overwrite if the output file already exists. Use with care.")]
+        public bool Force { get; set; }
+
         [Option('c', "image-count", DefaultValue = 5, HelpText = "The number of images to generate the panoramic image from.")]
         public int ImageCount { get; set; }
 

@@ -2,10 +2,8 @@
 using System.IO;
 using System.Net;
 
-namespace DimitriVranken.PanoramaCreator
-{
-    class CameraControl
-    {
+namespace DimitriVranken.PanoramaCreator {
+    class CameraControl {
         // TODO: Add logging
 
         const string UrlProtocol = "http://";
@@ -17,21 +15,29 @@ namespace DimitriVranken.PanoramaCreator
         public IPAddress CameraIpAddress { get; private set; }
 
 
-        public CameraControl(IPAddress cameraIpAddress)
-        {
+        public CameraControl(IPAddress cameraIpAddress) {
             CameraIpAddress = cameraIpAddress;
         }
 
 
-        private HttpWebResponse ExecuteCommand(string commandUrl)
-        {
+        private HttpWebResponse ExecuteCommand(string commandUrl) {
+#if DEBUG
+            return null;
+#endif
+
             var requestUrl = UrlProtocol + CameraIpAddress + UrlFolder + commandUrl;
+
+            Logger.Default.Info("Camera: Executing request '{0}'", requestUrl);
             var request = WebRequest.Create(requestUrl);
+
             return (HttpWebResponse)request.GetResponse();
         }
 
-        private bool ExecuteCommand(string commandUrl, string destinationFile)
-        {
+        private bool ExecuteCommand(string commandUrl, string destinationFile) {
+#if DEBUG
+            return false;
+#endif
+
             var response = ExecuteCommand(commandUrl);
 
             // Check if the response is valid
@@ -52,6 +58,7 @@ namespace DimitriVranken.PanoramaCreator
                             bytesRead = inputStream.Read(buffer, 0, buffer.Length);
                             outputStream.Write(buffer, 0, bytesRead);
                         } while (bytesRead != 0);
+                        Logger.Default.Error("Camera: Downloaded response of command '{0}'", commandUrl);
                     }
                 }
 
@@ -60,30 +67,27 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             // The file couldn't be downloaded
+            Logger.Default.Error("Camera: Couldn't download response of command '{0}'", commandUrl);
             return false;
         }
 
 
-        public void TakeImage(string destinationFile)
-        {
-            if (string.IsNullOrEmpty(destinationFile))
-            {
+        public void TakeImage(string destinationFile) {
+            if (string.IsNullOrEmpty(destinationFile)) {
                 throw new ArgumentNullException("destinationFile");
             }
 
             // Build command URL
-            string commandUrl = UrlImageCommand;
+            var commandUrl = UrlImageCommand;
 
             // Execute command
             ExecuteCommand(commandUrl, destinationFile);
         }
 
-        public void Rotate(CameraDirection direction)
-        {
+        public void Rotate(CameraDirection direction) {
             // Build command URL
-            string commandUrl = UrlRotationCommand;
-            switch (direction)
-            {
+            var commandUrl = UrlRotationCommand;
+            switch (direction) {
                 case CameraDirection.Home:
                     commandUrl += "home";
                     break;
