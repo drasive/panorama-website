@@ -5,6 +5,7 @@
   "dependencies": {
     "bootstrap": "~3.3.2",
     "modernizr": "~2.8.3",
-    "respond": "~1.4.2"
+    "respond": "~1.4.2",
+    "photoswipe": "~4.0.6"
   }
 }
