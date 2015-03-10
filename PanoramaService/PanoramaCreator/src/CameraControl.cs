@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 
@@ -6,17 +7,14 @@ namespace DimitriVranken.PanoramaCreator
 {
     class CameraControl
     {
-        // TODO: Test
-
         const string UrlProtocol = "http://";
         const string UrlFolder = "/cgi-bin/";
-        const string UrlPanSpeedCommand = "camctrl.cgi?speedpan=";
-        const string UrlRotationCommand = "camctrl.cgi?move=";
         const string UrlImageCommand = "video.jpg";
+        const string UrlRotationCommand = "camctrl.cgi?move=";
+        const string UrlPanSpeedCommand = "camctrl.cgi?speedpan=";
 
 
         public IPAddress CameraIpAddress { get; private set; }
-
 
         public CameraControl(IPAddress cameraIpAddress)
         {
@@ -36,16 +34,21 @@ namespace DimitriVranken.PanoramaCreator
             var request = WebRequest.Create(requestUrl);
             request.Timeout = 15 * 1000;
 
-            var proxy = new WebProxy();
-            var adress = "http://172.20.10.24:3128";
-            var username = "un";
-            var password = "pw";
-            proxy.Address = new Uri(adress);
-            proxy.Credentials = new NetworkCredential(username, password);
-            request.Proxy = proxy;
+            // TODO: Implement proxy
+            if (false)
+            {   
+                var address = "http://172.20.10.24:3128";
+                var username = "username";
+                var password = "password";
+                var proxy = new WebProxy();
+
+                proxy.Address = new Uri(address);
+                proxy.Credentials = new NetworkCredential(username, password);
+                request.Proxy = proxy;
+            }
 
             var response = (HttpWebResponse)request.GetResponse();
-            Logger.Default.Debug("Response received (HTTP {0})", response.StatusCode);
+            Logger.Default.Debug("Camera: Response received (HTTP {0})", response.StatusCode);
 
             System.Threading.Thread.Sleep(waitTime);
             return response;
@@ -101,21 +104,10 @@ namespace DimitriVranken.PanoramaCreator
             var commandUrl = UrlImageCommand;
 
             // Execute command
+            Logger.UserInterface.Debug("Camera: Taking an image");
             ExecuteCommand(commandUrl, destinationFile);
         }
-
-        public void SetPanSpeed(int speed)
-        {
-            // TODO: Validate params
-            // TODO: Log?
-
-             // Build command URL
-            var commandUrl = UrlPanSpeedCommand + speed;
-
-            // Execute command
-            ExecuteCommand(commandUrl, (int)(0.5 * 1000));
-        }
-
+        
         public void Rotate(CameraDirection direction)
         {
             // Build command URL
@@ -143,19 +135,30 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             // Set wait time
-            int waitTime;
-            if (direction == CameraDirection.Home)
-            {
-                waitTime = 5 * 1000;
-            }
-            else
-            {
-                waitTime = 3 * 1000;
-            }
+            var waitTime = (direction == CameraDirection.Home)
+                ? 6 * 1000
+                : 3 * 1000;
 
             // Execute command
-            Logger.UserInterface.Info("Rotating the camera: " + direction.ToString());
+            Logger.UserInterface.Info("Camera: Rotating {0}", direction.ToString().ToLower());
             ExecuteCommand(commandUrl, waitTime).Dispose();
         }
+
+        public void SetPanSpeed(int speed) {
+            if (speed < -5) {
+                throw new ArgumentOutOfRangeException(speed.ToString(CultureInfo.InvariantCulture));
+            }
+            if (speed > 5) {
+                throw new ArgumentOutOfRangeException(speed.ToString(CultureInfo.InvariantCulture));
+            }
+
+            // Build command URL
+            var commandUrl = UrlPanSpeedCommand + speed;
+
+            // Execute command
+            Logger.UserInterface.Debug("Camera: Setting the pan speed to {0}", speed);
+            ExecuteCommand(commandUrl, (int)(0.5 * 1000));
+        }
+
     }
 }

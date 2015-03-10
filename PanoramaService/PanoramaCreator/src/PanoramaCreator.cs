@@ -8,11 +8,14 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: Don't use DEBUG to detect cam
+        // TODO: Implement new options
+        // TODO: Panoramic image: Cut corners
+        // TODO: Merge commits
 
         static readonly Options Options = new Options();
         static IPAddress _ipAddress;
         static FileInfo _outputFile;
+
 
         static void Main(string[] args)
         {
@@ -71,81 +74,20 @@ namespace DimitriVranken.PanoramaCreator
                 Environment.Exit(1);
             }
         }
-
-
-        private static bool ParseOptions(string[] options)
-        {
-            // Parse options
-            CommandLine.Parser.Default.ParseArgumentsStrict(options, Options);
-
-
-            // Log raw options
-            Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
-            Logger.UserInterface.Debug("output: {0}", Options.Output);
-            Logger.UserInterface.Debug("force: {0}", Options.Force);
-            Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
-            Logger.UserInterface.Debug("verbose: {0}", Options.Verbose);
-
-
-            // Validate options
-            var optionInvalid = false;
-
-            if (!IPAddress.TryParse(Options.IpAddress, out _ipAddress))
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The specified ip-address is invalid.");
-            }
-
-            _outputFile = new FileInfo(Options.Output);
-            if (Options.Force == false && _outputFile.Exists)
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite.");
-            }
-
-            // "force" doesn't need to be validated
-
-            const int minimumImageCount = 2;
-            const int maximumImageCount = 10;
-            if (Options.ImageCount < minimumImageCount)
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The image-count may not be lower than {0}", minimumImageCount);
-            }
-            else if (Options.ImageCount > maximumImageCount)
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
-            }
-
-            // "verbose" doesn't need to be validated
-
-
-            // Return
-            return !optionInvalid;
-        }
-
-        private static void PrintHeading()
-        {
-            var assemblyInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
-            Console.WriteLine("{0} {1}", assemblyInfo.ProductName, assemblyInfo.ProductVersion);
-            Console.WriteLine("{0}", assemblyInfo.LegalCopyright);
-
-            Console.WriteLine();
-        }
-
+        
         private static List<string> TakeImages()
         {
             Console.WriteLine();
 
             // Setup camera
             var camera = new CameraControl(_ipAddress);
-            // TODO: Check if home can be set programatically
+            // TODO: Test if increased pan speed saves time
             camera.Rotate(CameraDirection.Home);
-            camera.SetPanSpeed(-3);
-            // TODO: Set rotation distance
-
+            // TODO: Move further left
+            
             // Take images
+            camera.SetPanSpeed(-3); // TODO: Test out other pan speed values
+            // TODO: Test out amount of images required
             var imageFiles = new List<string>();
             for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
             {
@@ -172,6 +114,61 @@ namespace DimitriVranken.PanoramaCreator
 
             Common.CheckDirectory(_outputFile.Directory.FullName);
             PanoramaGenerator.GeneratePanoramicImage(imageFiles, _outputFile.FullName);
+        }
+
+        private static bool ParseOptions(string[] options) {
+            // Parse options
+            CommandLine.Parser.Default.ParseArgumentsStrict(options, Options);
+
+
+            // Log raw options
+            Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
+            Logger.UserInterface.Debug("output: {0}", Options.Output);
+            Logger.UserInterface.Debug("force: {0}", Options.Force);
+            Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
+            Logger.UserInterface.Debug("verbose: {0}", Options.Verbose);
+
+
+            // Validate options
+            var optionInvalid = false;
+
+            if (!IPAddress.TryParse(Options.IpAddress, out _ipAddress)) {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The specified ip-address is invalid.");
+            }
+
+            _outputFile = new FileInfo(Options.Output);
+            if (Options.Force == false && _outputFile.Exists) {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite.");
+            }
+
+            // "force" doesn't need to be validated
+
+            const int minimumImageCount = 2;
+            const int maximumImageCount = 10;
+            if (Options.ImageCount < minimumImageCount) {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The image-count may not be lower than {0}", minimumImageCount);
+            }
+            else if (Options.ImageCount > maximumImageCount) {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
+            }
+
+            // "verbose" doesn't need to be validated
+
+
+            // Return
+            return !optionInvalid;
+        }
+
+        private static void PrintHeading() {
+            var assemblyInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
+            Console.WriteLine("{0} {1}", assemblyInfo.ProductName, assemblyInfo.ProductVersion);
+            Console.WriteLine("{0}", assemblyInfo.LegalCopyright);
+
+            Console.WriteLine();
         }
     }
 }
