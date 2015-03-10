@@ -76,6 +76,7 @@ namespace DimitriVranken.PanoramaCreator
 
             // Load bitmaps
             Logger.Default.Debug("PanoramicGenerator: Loading bitmaps");
+            // TODO: Add existence check
             var images = imageFilesList.Select(imageFile => new Bitmap(imageFile)).ToList();
 
             // Merge first two images

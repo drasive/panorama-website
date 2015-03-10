@@ -8,6 +8,8 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
+        // TODO: Don't use DEBUG to detect cam
+
         static readonly Options Options = new Options();
         static IPAddress _ipAddress;
         static FileInfo _outputFile;
@@ -103,7 +105,7 @@ namespace DimitriVranken.PanoramaCreator
 
             // "force" doesn't need to be validated
 
-            const int minimumImageCount = 1;
+            const int minimumImageCount = 2;
             const int maximumImageCount = 10;
             if (Options.ImageCount < minimumImageCount)
             {
@@ -138,7 +140,9 @@ namespace DimitriVranken.PanoramaCreator
 
             // Setup camera
             var camera = new CameraControl(_ipAddress);
+            // TODO: Check if home can be set programatically
             camera.Rotate(CameraDirection.Home);
+            camera.SetPanSpeed(-3);
             // TODO: Set rotation distance
 
             // Take images
@@ -155,7 +159,6 @@ namespace DimitriVranken.PanoramaCreator
                 // Rotate camera (not after the last image was taken)
                 if (imageIndex < Options.ImageCount)
                 {
-                    Logger.UserInterface.Debug("Rotating the camera to the right.");
                     camera.Rotate(CameraDirection.Right);
                 }
             }

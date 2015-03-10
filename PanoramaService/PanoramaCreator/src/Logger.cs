@@ -7,6 +7,7 @@ namespace DimitriVranken.PanoramaCreator
         private static readonly NLog.Logger _default = LogManager.GetCurrentClassLogger();
         private static readonly NLog.Logger _userInterface = LogManager.GetLogger("UserInterface");
 
+
         public static NLog.Logger Default
         {
             get { return _default; }
