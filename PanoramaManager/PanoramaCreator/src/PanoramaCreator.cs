@@ -8,7 +8,7 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: Implement new options
+        // TODO: Check DEBUG preproc
         // TODO: Panoramic image: Cut corners
         // TODO: Merge commits
 
@@ -136,14 +136,14 @@ namespace DimitriVranken.PanoramaCreator
             Camera camera;
             if (Options.ProxyAddressParsed == null)
             {
-                camera = new Camera(Options.IpAddressParsed);
+                camera = new Camera(Options.IpAddressParsed, Options.NoNetwork);
             }
             else
             {
                 var proxy = new WebProxy(Options.ProxyAddressParsed, true);
                 proxy.Credentials = new NetworkCredential(Options.ProxyUsername, Options.ProxyPassword);
 
-                camera = new Camera(Options.IpAddressParsed, proxy);
+                camera = new Camera(Options.IpAddressParsed, proxy, Options.NoNetwork);
             }
 
             // TODO: Test if increased pan speed saves time

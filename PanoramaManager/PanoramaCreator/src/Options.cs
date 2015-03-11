@@ -35,7 +35,6 @@ namespace DimitriVranken.PanoramaCreator
         [Option('v', "verbose", DefaultValue = false, HelpText = "Print verbose details during execution.")]
         public bool Verbose { get; set; }
 
-        // TODO: Implement no-network
         [Option("no-network", DefaultValue = false, HelpText = "Do not use any network resources like the camera.")]
         public bool NoNetwork { get; set; }
 

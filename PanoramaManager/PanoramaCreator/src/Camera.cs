@@ -18,8 +18,10 @@ namespace DimitriVranken.PanoramaCreator
 
         public WebProxy Proxy { get; private set; }
 
+        public bool NoNetwork { get; private set; }
 
-        public Camera(IPAddress ipAddress)
+
+        public Camera(IPAddress ipAddress, bool noNetwork = false)
         {
             if (ipAddress == null)
             {
@@ -27,10 +29,11 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             IpAddress = ipAddress;
+            NoNetwork = noNetwork;
         }
 
-        public Camera(IPAddress ipAddress, WebProxy proxy)
-            : this(ipAddress)
+        public Camera(IPAddress ipAddress, WebProxy proxy, bool noNetwork = false)
+            : this(ipAddress, noNetwork)
         {
             Proxy = proxy;
         }
@@ -38,9 +41,11 @@ namespace DimitriVranken.PanoramaCreator
 
         private HttpWebResponse ExecuteCommand(string commandUrl, int waitTime)
         {
-#if DEBUG
-            return null;
-#endif
+            if (NoNetwork)
+            {
+                return null;
+            }
+
 
             var requestUrl = UrlProtocol + IpAddress + UrlCommandFolder + commandUrl;
 
@@ -61,9 +66,11 @@ namespace DimitriVranken.PanoramaCreator
 
         private bool ExecuteCommand(string commandUrl, string destinationFile)
         {
-#if DEBUG
-            return false;
-#endif
+            if (NoNetwork)
+            {
+                return false;
+            }
+
 
             using (var response = ExecuteCommand(commandUrl, 3 * 1000))
             {
@@ -146,7 +153,12 @@ namespace DimitriVranken.PanoramaCreator
 
             // Execute command
             Logger.UserInterface.Debug("Rotating the camera {0}", direction.ToString().ToLower());
-            ExecuteCommand(commandUrl, waitTime).Dispose();
+
+            var response = ExecuteCommand(commandUrl, waitTime);
+            if (response != null)
+            {
+                response.Dispose();
+            }
         }
 
         public void SetPanSpeed(int speed)
@@ -165,7 +177,12 @@ namespace DimitriVranken.PanoramaCreator
 
             // Execute command
             Logger.UserInterface.Debug("Setting the camera pan speed to {0}", speed);
-            ExecuteCommand(commandUrl, (int)(0.5 * 1000));
+
+            var response = ExecuteCommand(commandUrl, (int)(0.5 * 1000));
+            if (response != null)
+            {
+                response.Dispose();
+            }
         }
 
     }
