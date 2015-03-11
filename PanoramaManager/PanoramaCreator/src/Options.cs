@@ -1,4 +1,6 @@
-﻿using CommandLine;
+﻿using System;
+using System.Net;
+using CommandLine;
 using CommandLine.Text;
 
 namespace DimitriVranken.PanoramaCreator
@@ -7,6 +9,7 @@ namespace DimitriVranken.PanoramaCreator
     {
         [Option('a', "ip-address", Required = true, HelpText = "The ip address of the camera.")]
         public string IpAddress { get; set; }
+        public IPAddress IpAddressParsed { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "The file to output the panoramic image to.")]
         public string Output { get; set; }
@@ -18,9 +21,9 @@ namespace DimitriVranken.PanoramaCreator
         public int ImageCount { get; set; }
 
 
-        // TODO: Implement proxy
         [Option("proxy-address", HelpText = "The address of the proxy server to use.")]
         public string ProxyAddress { get; set; }
+        public Uri ProxyAddressParsed { get; set; }
 
         [Option("proxy-username", HelpText = "The username for the proxy server.")]
         public string ProxyUsername { get; set; }

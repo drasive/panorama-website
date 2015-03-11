@@ -5,10 +5,8 @@ using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
 {
-    class CameraControl
+    class Camera
     {
-        // TODO: Use custom logger
-
         const string UrlProtocol = "http://";
         const string UrlCommandFolder = "/cgi-bin/";
         const string UrlTakeImageCommand = "video.jpg";
@@ -21,12 +19,17 @@ namespace DimitriVranken.PanoramaCreator
         public WebProxy Proxy { get; private set; }
 
 
-        public CameraControl(IPAddress ipAddress)
+        public Camera(IPAddress ipAddress)
         {
+            if (ipAddress == null)
+            {
+                throw new ArgumentNullException("ipAddress");
+            }
+
             IpAddress = ipAddress;
         }
 
-        public CameraControl(IPAddress ipAddress, WebProxy proxy)
+        public Camera(IPAddress ipAddress, WebProxy proxy)
             : this(ipAddress)
         {
             Proxy = proxy;
@@ -43,19 +46,10 @@ namespace DimitriVranken.PanoramaCreator
 
             Logger.Default.Info("Camera: Executing request '{0}'", requestUrl);
             var request = WebRequest.Create(requestUrl);
-            request.Timeout = 15 * 1000;
-
-            // TODO: Implement proxy
-            if (false)
+            request.Timeout = 20 * 1000;
+            if (Proxy != null)
             {
-                var address = "http://172.20.10.24:3128";
-                var username = "username";
-                var password = "password";
-                var proxy = new WebProxy();
-
-                proxy.Address = new Uri(address);
-                proxy.Credentials = new NetworkCredential(username, password);
-                request.Proxy = proxy;
+                request.Proxy = Proxy;
             }
 
             var response = (HttpWebResponse)request.GetResponse();
@@ -151,7 +145,7 @@ namespace DimitriVranken.PanoramaCreator
                 : 3 * 1000;
 
             // Execute command
-            Logger.UserInterface.Info("Rotating the camera {0}", direction.ToString().ToLower());
+            Logger.UserInterface.Debug("Rotating the camera {0}", direction.ToString().ToLower());
             ExecuteCommand(commandUrl, waitTime).Dispose();
         }
 

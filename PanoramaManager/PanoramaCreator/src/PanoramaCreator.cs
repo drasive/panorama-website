@@ -13,7 +13,6 @@ namespace DimitriVranken.PanoramaCreator
         // TODO: Merge commits
 
         static readonly Options Options = new Options();
-        static IPAddress _ipAddress;
         static FileInfo _outputFile;
 
 
@@ -37,29 +36,79 @@ namespace DimitriVranken.PanoramaCreator
             Logger.UserInterface.Debug("output: {0}", Options.Output);
             Logger.UserInterface.Debug("force: {0}", Options.Force);
             Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
+
+            Logger.UserInterface.Debug("proxy-address: {0}", Options.ProxyAddress);
+            Logger.UserInterface.Debug("proxy-username: {0}", Options.ProxyUsername);
+            Logger.UserInterface.Debug("proxy-password: {0}", Options.ProxyPassword);
+
             Logger.UserInterface.Debug("verbose: {0}", Options.Verbose);
+            Logger.UserInterface.Debug("no-network: {0}", Options.NoNetwork);
 
 
             // Validate options
             var optionInvalid = false;
 
-            if (!IPAddress.TryParse(Options.IpAddress, out _ipAddress))
+            // ---ip-address
+            IPAddress ipAddressParsed;
+            if (IPAddress.TryParse(Options.IpAddress, out ipAddressParsed))
+            {
+                Options.IpAddressParsed = ipAddressParsed;
+            }
+            else
             {
                 optionInvalid = true;
-                Logger.UserInterface.Error("Error: The specified ip-address is invalid.");
+                Logger.UserInterface.Error("Error: The specified ip-address is invalid");
             }
 
+            // ---output
             _outputFile = new FileInfo(Options.Output);
             if (Options.Force == false && _outputFile.Exists)
             {
                 optionInvalid = true;
-                Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite.");
+                Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite");
             }
 
-            // "force" doesn't need to be validated
+            // ---proxy-address
+            if (!string.IsNullOrEmpty(Options.ProxyAddress))
+            {
+                Uri proxyAddressParsed;
 
+                if (Uri.TryCreate(Options.ProxyAddress, UriKind.Absolute, out proxyAddressParsed))
+                {
+                    Options.ProxyAddressParsed = proxyAddressParsed;
+                }
+                else
+                {
+                    optionInvalid = true;
+                    Logger.UserInterface.Error("Error: The specified proxy-address is invalid");
+                }
+            }
+
+            // ---proxy-username
+            if (Options.ProxyUsername != null && Options.ProxyAddressParsed == null)
+            {
+                Logger.UserInterface.Warn("Warning: The specified proxy-username is ignored because no proxy-address is set");
+            }
+            else if (Options.ProxyUsername == null && Options.ProxyAddress != null)
+            {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: proxy-username needs to be set too when using proxy-address");
+            }
+
+            // ---proxy-password
+            if (Options.ProxyPassword != null && Options.ProxyAddress == null)
+            {
+                Logger.UserInterface.Warn("Warning: The specified proxy-password is ignored because no proxy-address is set");
+            }
+            else if (Options.ProxyPassword == null && Options.ProxyAddress != null)
+            {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: proxy-password needs to be set too when using proxy-address");
+            }
+
+            // ---image-count
             const int minimumImageCount = 2;
-            const int maximumImageCount = 15;
+            const int maximumImageCount = 25;
             if (Options.ImageCount < minimumImageCount)
             {
                 optionInvalid = true;
@@ -71,7 +120,9 @@ namespace DimitriVranken.PanoramaCreator
                 Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
             }
 
-            // "verbose" doesn't need to be validated
+            // ---verbose doesn't need to be parsed
+
+            // ---no-network doesn't need to be parsed
 
 
             return !optionInvalid;
@@ -82,7 +133,19 @@ namespace DimitriVranken.PanoramaCreator
             Console.WriteLine();
 
             // Setup camera
-            var camera = new CameraControl(_ipAddress);
+            Camera camera;
+            if (Options.ProxyAddressParsed == null)
+            {
+                camera = new Camera(Options.IpAddressParsed);
+            }
+            else
+            {
+                var proxy = new WebProxy(Options.ProxyAddressParsed, true);
+                proxy.Credentials = new NetworkCredential(Options.ProxyUsername, Options.ProxyPassword);
+
+                camera = new Camera(Options.IpAddressParsed, proxy);
+            }
+
             // TODO: Test if increased pan speed saves time
             camera.Rotate(CameraDirection.Home);
             // TODO: Move further left
@@ -125,6 +188,9 @@ namespace DimitriVranken.PanoramaCreator
             {
                 var stopwatch = Stopwatch.StartNew();
 
+                // Print header
+                PrintHeading();
+
                 // Parse parameters
                 if (!ParseOptions(args))
                 {
@@ -133,8 +199,7 @@ namespace DimitriVranken.PanoramaCreator
 
 
                 // Print info
-                PrintHeading();
-                Console.WriteLine("Camera IP address: {0}", _ipAddress);
+                Console.WriteLine("Camera IP address: {0}", Options.IpAddressParsed);
 
                 // Capture images
                 var imageFiles = TakeImages();

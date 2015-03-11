@@ -9,8 +9,6 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramicImageGenerator
     {
-        // TODO: Use custom logger
-
         private static Bitmap ChangeImageResolution(Image image, decimal scalingFactor)
         {
             return new Bitmap(image, (int)(image.Width * scalingFactor), (int)(image.Height * scalingFactor));
