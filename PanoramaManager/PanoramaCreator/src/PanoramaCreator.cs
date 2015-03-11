@@ -8,12 +8,9 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: Check DEBUG preproc
-        // TODO: Panoramic image: Cut corners
         // TODO: Merge commits
 
         static readonly Options Options = new Options();
-        static FileInfo _outputFile;
 
 
         private static void PrintHeading()
@@ -61,8 +58,8 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             // ---output
-            _outputFile = new FileInfo(Options.Output);
-            if (Options.Force == false && _outputFile.Exists)
+            Options.OutputParsed = new FileInfo(Options.Output);
+            if (Options.Force == false && Options.OutputParsed.Exists)
             {
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite");
@@ -146,7 +143,7 @@ namespace DimitriVranken.PanoramaCreator
                 camera = new Camera(Options.IpAddressParsed, proxy, Options.NoNetwork);
             }
 
-            // TODO: Test if increased pan speed saves time
+            // TODO: Test if increased pan speed saves time when turning home
             camera.Rotate(CameraDirection.Home);
             // TODO: Move further left
 
@@ -157,7 +154,8 @@ namespace DimitriVranken.PanoramaCreator
             for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
             {
                 // Take image
-                var imageFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".jpg");
+                // TODO: Make sure doesn't exist
+                var imageFile = Path.Combine(Common.GetTemporaryFolder(), Guid.NewGuid() + ".jpg");
                 imageFiles.Add(imageFile);
 
                 Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, Options.ImageCount);
@@ -170,6 +168,17 @@ namespace DimitriVranken.PanoramaCreator
                 }
             }
 
+            if (Options.NoNetwork)
+            {
+                // Use example images
+                imageFiles.Clear();
+
+                for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
+                {
+                    imageFiles.Add(String.Format(@"C:\temp\img{0}.jpg", imageFileIndex));
+                }
+            }
+
             return imageFiles;
         }
 
@@ -177,8 +186,8 @@ namespace DimitriVranken.PanoramaCreator
         {
             Console.WriteLine();
 
-            Common.CheckDirectory(_outputFile.Directory.FullName);
-            PanoramicImageGenerator.GeneratePanoramicImage(imageFiles, _outputFile.FullName);
+            Common.CheckDirectory(Options.OutputParsed.Directory.FullName);
+            PanoramicImageGenerator.GeneratePanoramicImage(imageFiles, Options.OutputParsed.FullName);
         }
 
 
@@ -197,33 +206,24 @@ namespace DimitriVranken.PanoramaCreator
                     Environment.Exit(1);
                 }
 
-
                 // Print info
                 Console.WriteLine("Camera IP address: {0}", Options.IpAddressParsed);
 
                 // Capture images
                 var imageFiles = TakeImages();
-#if DEBUG
-                imageFiles.Clear();
-                for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
-                {
-                    imageFiles.Add(String.Format(@"C:\temp\img{0}.jpg", imageFileIndex));
-                }
-#endif
 
                 // Generate panoramic image
                 GeneratePanoramicImage(imageFiles);
 
-
-#if DEBUG
-#else
                 // Delete temporary files
-                Logger.UserInterface.Debug("Deleting temporary files");
-                foreach (var imageFile in imageFiles)
-                {
-                    Common.TryDeleteFile(imageFile);
+                if (!Options.NoNetwork){
+                    Logger.UserInterface.Debug("Deleting temporary files");
+
+                    foreach (var imageFile in imageFiles)
+                    {
+                        Common.TryDeleteFile(imageFile);
+                    }
                 }
-#endif
 
                 // Print done
                 stopwatch.Stop();
@@ -240,6 +240,9 @@ namespace DimitriVranken.PanoramaCreator
                                            "See the log file for more information.", exception.Message);
                 Logger.Default.FatalException("", exception);
 
+#if DEBUG
+                Console.ReadLine();
+#endif
                 Environment.Exit(1);
             }
         }

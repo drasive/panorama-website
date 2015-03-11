@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using CommandLine;
 using CommandLine.Text;
@@ -13,6 +14,7 @@ namespace DimitriVranken.PanoramaCreator
 
         [Option('o', "output", Required = true, HelpText = "The file to output the panoramic image to.")]
         public string Output { get; set; }
+        public FileInfo OutputParsed { get; set; }
 
         [Option('f', "force", DefaultValue = false, HelpText = "Force an overwrite if the output file already exists. Use with care.")]
         public bool Force { get; set; }

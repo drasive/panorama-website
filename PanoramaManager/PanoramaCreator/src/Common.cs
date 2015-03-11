@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 
 namespace DimitriVranken.PanoramaCreator
 {
@@ -36,6 +37,18 @@ namespace DimitriVranken.PanoramaCreator
             {
                 Logger.Default.Debug("File {0} doesn't exists and is not deleted", filePath);
             }
+        }
+
+
+        public static string GetTemporaryFolder()
+        {
+            var temporaryFolder = Path.GetTempPath();
+
+            var assemblyInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
+            var programSubfolder = assemblyInfo.ProductName;
+
+
+            return Path.Combine(temporaryFolder, programSubfolder);
         }
     }
 }
