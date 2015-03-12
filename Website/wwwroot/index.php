@@ -14,9 +14,9 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/main.css">
+
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="css/main.css">
 
     <!-- Scripts -->
     <script src="bower_components/modernizr/modernizr.js"></script>
@@ -30,7 +30,7 @@
     <?php
     require("_functions.php");
     
-    SetActivePage('index');    
+    SetActivePage('index');
     require("_header.php");
     
     include("_noscript_warning.html");
@@ -40,12 +40,15 @@
         <div class="row">
             <div class="col-xs-12 text-center">
                 <h1>Live Image</h1>
+
                 <p>
                     This is a live panoramic image. It was last refreshed at [x] ([x] ago).
                 </p>
                 <p>
-                    <img class="fullscreen" src="http://placehold.it/1280x720" />
+                    <img class="image-fullscreen image-zoom"
+                        src="http://placehold.it/1280x720" data-zoom-image="http://placehold.it/3840x2160" />
                 </p>
+
                 <p>
                     Visit the <a href="archive.php">archive</a> to see older images.                   
                 </p>
@@ -53,13 +56,15 @@
         </div>
     </div>
 
-        <?php require("_footer.php") ?>
+    <?php require("_footer.php") ?>
 
     <!-- Scripts -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
-    <script src="js/main.js"></script>
+    <script src="plugins/elevatezoom/jquery.elevateZoom.min.js"></script>
+
     <script src="js/noscript.js"></script>
+    <script src="js/index.js"></script>
 </body>
 </html>

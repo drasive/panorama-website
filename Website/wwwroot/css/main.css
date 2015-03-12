@@ -17,6 +17,11 @@
 }
 
 
+.gallery {
+    margin: 0px auto;
+    display: none;
+}
+
 /* Makes Bootstrap drop down buttons click-able */
 ul.nav li.dropdown:hover ul.dropdown-menu {
     display: block;
