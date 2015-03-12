@@ -77,7 +77,6 @@
         </div>
 
         <?php require("_footer.php") ?>
-    </div>
 
     <!-- Scripts -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
