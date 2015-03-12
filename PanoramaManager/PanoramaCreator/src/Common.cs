@@ -14,7 +14,7 @@ namespace DimitriVranken.PanoramaCreator
             }
             else
             {
-                Logger.Default.Debug("Directory '{0}' already exists and is not created.", directoryPath);
+                Logger.Default.Trace("Directory '{0}' already exists and is not created.", directoryPath);
             }
         }
 
@@ -29,13 +29,13 @@ namespace DimitriVranken.PanoramaCreator
                 }
                 catch
                 {
-                    Logger.Default.Debug("Failed to delete file {0}", filePath);
+                    Logger.Default.Warn("Failed to delete file {0}", filePath);
                     // ignore
                 }
             }
             else
             {
-                Logger.Default.Debug("File {0} doesn't exists and is not deleted", filePath);
+                Logger.Default.Trace("File {0} doesn't exists and is not deleted", filePath);
             }
         }
 

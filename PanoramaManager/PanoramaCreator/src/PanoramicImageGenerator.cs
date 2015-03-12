@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
@@ -73,43 +75,84 @@ namespace DimitriVranken.PanoramaCreator
         {
             var imageFilesList = imageFiles as IList<string> ?? imageFiles.ToList();
 
-            // Load raw bitmaps
-            Logger.Default.Debug("PanoramicGenerator: Loading bitmaps");
-            // TODO: Add existence check
-            var imagesRaw = imageFilesList.Select(imageFile => new Bitmap(imageFile)).ToList();
+            var imagesRaw = new List<Bitmap>();
+            var images = new List<Bitmap>();
+            Bitmap panoramicImage = null;
 
-            // Process raw bitmaps
-            var images = imagesRaw.Select(image => ReduceImageResolution(image, 1920)).ToList();
-            images = images.Select(image => ConvertImageFormat(image, PixelFormat.Format24bppRgb)).ToList();
-
-            // Merge first two images
-            Logger.UserInterface.Info("Merging images 1/{0}", imageFilesList.Count() - 1);
-            var panoramicImage = MergeImages(images[0], images[1]);
-
-            // Merge remaining images
-            for (var imageIndex = 2; imageIndex < imageFilesList.Count(); imageIndex++)
+            try
             {
-                Logger.UserInterface.Info("Merging images {0}/{1}", imageIndex, imageFilesList.Count() - 1);
-                panoramicImage = MergeImages(panoramicImage, images[imageIndex]);
+                // Load raw bitmaps
+                Logger.Default.Debug("PanoramicGenerator: Loading bitmaps");
+
+                foreach (var imageFile in imageFilesList)
+                {
+                    if (!File.Exists(imageFile))
+                    {
+#if DEBUG
+                    Logger.UserInterface.Warn("Warning: The snapshot {0} doesn't exist and won't be merged into the panoramic image", imageFile);
+                    continue;
+#else
+                        throw new FileNotFoundException(String.Format(
+                                "The snapshot '{0}' doesn't exist and can't be merged into the panoramic image.",
+                                imageFile));
+#endif
+                    }
+
+                    imagesRaw.Add(new Bitmap(imageFile));
+                }
+
+                // Process raw bitmaps
+                Logger.Default.Debug("PanoramicGenerator: Processing bitmaps");
+
+                const int maximumImageResolution = 1920;
+                images = imagesRaw.Select(imageRaw => ReduceImageResolution(imageRaw, maximumImageResolution)).ToList();
+                images = images.Select(image => ConvertImageFormat(image, PixelFormat.Format24bppRgb)).ToList();
+
+                // Merge first two images
+                Logger.UserInterface.Info("Merging images 1/{0}", images.Count() - 1);
+                panoramicImage = MergeImages(images[0], images[1]);
+
+                // Merge remaining images
+                for (var imageIndex = 2; imageIndex < images.Count(); imageIndex++)
+                {
+                    Logger.UserInterface.Info("Merging images {0}/{1}", imageIndex, images.Count() - 1);
+                    panoramicImage = MergeImages(panoramicImage, images[imageIndex]);
+                }
+
+                // Process panoramic image
+                Logger.Default.Debug("PanoramicGenerator: Processing the panoramic image");
+
+                const int maximumPanoramaResolution = 8192;
+                panoramicImage = ReduceImageResolution(panoramicImage, maximumPanoramaResolution);
+
+                // Save panoramic image
+                Logger.Default.Info("PanoramicGenerator: Saving the panoramic image to '{0}'", outputFile);
+                panoramicImage.Save(outputFile, ImageFormat.Png);
             }
-
-            // Save panoramic image
-            Logger.Default.Info("PanoramicGenerator: Saving the panoramic image to '{0}'", outputFile);
-            panoramicImage = ReduceImageResolution(panoramicImage, 10000);
-            panoramicImage.Save(outputFile, ImageFormat.Png);
-
-            // Dispose bitmaps
-            foreach (var imageRaw in images)
+            finally
             {
-                imageRaw.Dispose();
-            }
+                // Dispose bitmaps
+                if (panoramicImage != null)
+                {
+                    panoramicImage.Dispose();
+                }
 
-            foreach (var image in images)
-            {
-                image.Dispose();
-            }
+                foreach (var image in images)
+                {
+                    if (image != null)
+                    {
+                        image.Dispose();
+                    }
+                }
 
-            panoramicImage.Dispose();
+                foreach (var imageRaw in imagesRaw)
+                {
+                    if (imageRaw != null)
+                    {
+                        imageRaw.Dispose();
+                    }
+                }
+            }
         }
     }
 }

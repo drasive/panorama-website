@@ -154,10 +154,8 @@ namespace DimitriVranken.PanoramaCreator
             // Execute command
             Logger.UserInterface.Debug("Rotating the camera {0}", direction.ToString().ToLower());
 
-            var response = ExecuteCommand(commandUrl, waitTime);
-            if (response != null)
-            {
-                response.Dispose();
+            using (ExecuteCommand(commandUrl, waitTime)) {
+                // using-block makes sure the return value gets disposed properly in all cases
             }
         }
 
@@ -178,10 +176,9 @@ namespace DimitriVranken.PanoramaCreator
             // Execute command
             Logger.UserInterface.Debug("Setting the camera pan speed to {0}", speed);
 
-            var response = ExecuteCommand(commandUrl, (int)(0.5 * 1000));
-            if (response != null)
+            using (ExecuteCommand(commandUrl, (int)(0.5 * 1000)))
             {
-                response.Dispose();
+                // using-block makes sure the return value gets disposed properly in all cases
             }
         }
 

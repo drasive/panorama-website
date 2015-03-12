@@ -8,10 +8,10 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: Merge commits
+        // TODO: Change -o parameter to folder, use for example images
 
         static readonly Options Options = new Options();
-
+        static Camera _camera;
 
         private static void PrintHeading()
         {
@@ -27,6 +27,10 @@ namespace DimitriVranken.PanoramaCreator
             // Parse options
             CommandLine.Parser.Default.ParseArgumentsStrict(options, Options);
 
+            if (Options.Verbose)
+            {
+                Logger.UserInterface.UpdateLogLevel(NLog.LogLevel.Debug);
+            }
 
             // Log raw options
             Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
@@ -125,46 +129,61 @@ namespace DimitriVranken.PanoramaCreator
             return !optionInvalid;
         }
 
-        private static List<string> TakeImages()
+        private static void SetupCamera()
         {
-            Console.WriteLine();
+            if (_camera != null)
+            {
+                return;
+            }
 
-            // Setup camera
-            Camera camera;
             if (Options.ProxyAddressParsed == null)
             {
-                camera = new Camera(Options.IpAddressParsed, Options.NoNetwork);
+                _camera = new Camera(Options.IpAddressParsed, Options.NoNetwork);
             }
             else
             {
                 var proxy = new WebProxy(Options.ProxyAddressParsed, true);
                 proxy.Credentials = new NetworkCredential(Options.ProxyUsername, Options.ProxyPassword);
 
-                camera = new Camera(Options.IpAddressParsed, proxy, Options.NoNetwork);
+                _camera = new Camera(Options.IpAddressParsed, proxy, Options.NoNetwork);
+            }
+        }
+
+        private static List<string> TakeImages()
+        {
+            Console.WriteLine();
+
+            SetupCamera();
+
+            // Move into starting position
+            // TODO: (Networking) Test if increased pan speed saves time when turning to starting position
+            _camera.Rotate(CameraDirection.Home);
+            var stepsToTheLeft = Math.Floor((decimal)Options.ImageCount / 2);
+            for (var stepsExecuted = 0; stepsExecuted < stepsToTheLeft; stepsExecuted++)
+            {
+                _camera.Rotate(CameraDirection.Left);
             }
 
-            // TODO: Test if increased pan speed saves time when turning home
-            camera.Rotate(CameraDirection.Home);
-            // TODO: Move further left
-
             // Take images
-            camera.SetPanSpeed(-3); // TODO: Test out other pan speed values
-            // TODO: Test out amount of images required
+            // TODO: (Networking) Test out other pan speed values and the panoramic image quality
+            _camera.SetPanSpeed(-3);
+
             var imageFiles = new List<string>();
+            // TODO: (Networking) Test out amount of images required for 180 degrees
             for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
             {
                 // Take image
-                // TODO: Make sure doesn't exist
-                var imageFile = Path.Combine(Common.GetTemporaryFolder(), Guid.NewGuid() + ".jpg");
+                var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                var imageFile = Path.Combine(Common.GetTemporaryFolder(), String.Format("Snapshot {0} ({1}).jpg", imageTimestamp, Guid.NewGuid()));
                 imageFiles.Add(imageFile);
 
                 Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, Options.ImageCount);
-                camera.TakeImage(imageFile);
+                _camera.TakeImage(imageFile);
 
                 // Rotate camera (not after the last image was taken)
                 if (imageIndex < Options.ImageCount)
                 {
-                    camera.Rotate(CameraDirection.Right);
+                    _camera.Rotate(CameraDirection.Right);
                 }
             }
 
@@ -195,6 +214,7 @@ namespace DimitriVranken.PanoramaCreator
         {
             try
             {
+                Logger.Default.Info("Application started");
                 var stopwatch = Stopwatch.StartNew();
 
                 // Print header
