@@ -11,7 +11,7 @@ function SetActivePage($newActivePage) {
 function CheckNavbarLinkActive($navbarLinkTitle) {
     global $activePage;
     
-    if (!is_null($activePage) && $activePage === $navbarLinkTitle) {
+    if (!is_null($activePage) && strcasecmp($activePage, $navbarLinkTitle) === 0) {
         echo " active ";
     }
 }

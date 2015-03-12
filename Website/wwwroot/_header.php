@@ -7,7 +7,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Panorama Website</a>
+            <a class="navbar-brand" href="index.php">Panorama Website</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -16,9 +16,7 @@
                     <a href="archive.php">Archive <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <?php
-                            // TODO: List last 14 (configurable) days. List days without images?            
-                        
-                            
+                            // TODO: List last 14 (configurable) days. List days without images?
                         ?>
 
                         <li><a href="#">Action</a></li>
@@ -30,7 +28,7 @@
                         <li><a href="#">One more separated link</a></li>
                     </ul>
                 </li>
-                <li><a class="<?php CheckNavbarLinkActive('about'); ?>" href="about.php">About</a></li>
+                <li class="<?php CheckNavbarLinkActive('about'); ?>"><a href="about.php">About</a></li>
             </ul>
         </div>
     </div>
