@@ -158,6 +158,10 @@ namespace DimitriVranken.PanoramaCreator
             // Move into starting position
             // TODO: (Networking) Test if increased pan speed saves time when turning to starting position
             _camera.Rotate(CameraDirection.Home);
+
+            // TODO: (Networking) Test out other pan speed values and the panoramic image quality
+            _camera.SetPanSpeed(-3);
+
             var stepsToTheLeft = Math.Floor((decimal)Options.ImageCount / 2);
             for (var stepsExecuted = 0; stepsExecuted < stepsToTheLeft; stepsExecuted++)
             {
@@ -165,9 +169,6 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             // Take images
-            // TODO: (Networking) Test out other pan speed values and the panoramic image quality
-            _camera.SetPanSpeed(-3);
-
             var imageFiles = new List<string>();
             // TODO: (Networking) Test out amount of images required for 180 degrees
             for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
