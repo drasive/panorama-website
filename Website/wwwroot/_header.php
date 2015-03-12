@@ -16,16 +16,23 @@
                     <a href="archive.php">Archive <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <?php
-                            // TODO: List last 14 (configurable) days. List days without images?
+                        // TODO: List days without images?                        
+                        
+                        $currentDay = strtotime(date('Y-m-d'));
+                        // TODO: Use config amount of days
+                        for ($dayIndex = 0; $dayIndex < 14; $dayIndex++) {
+                            // Output link
+                            echo '<li><a href="archive.php?date=' . date('Y-m-d', $currentDay) . '">' . date('D, d.m.Y', $currentDay) . '</a></li>';
+                            
+                            // Output divider between weeks
+                            if (date('N', $currentDay) == 1) {
+                                echo '<li class="divider"></li>';
+                            }
+                            
+                            // Reduce current day by one
+                            $currentDay -= 60 * 60 * 24;
+                        }
                         ?>
-
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header">Nav header</li>
-                        <li><a href="#">Separated link</a></li>
-                        <li><a href="#">One more separated link</a></li>
                     </ul>
                 </li>
                 <li class="<?php CheckNavbarLinkActive('about'); ?>"><a href="about.php">About</a></li>

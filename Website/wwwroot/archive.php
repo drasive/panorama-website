@@ -14,8 +14,10 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/main.css">
+
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+
     <link rel="stylesheet" href="plugins/unitegallery/css/unite-gallery.css" />
 
     <!-- Scripts -->
@@ -36,11 +38,40 @@
     include("_noscript_error.html");
     ?>
 
-    <div class="container">
+    <?php
+    // Get date
+    $dateParameter = null;    
+    if(isset($_GET['date'])) {
+        $dateParameter = $_GET['date'];
+    }
+    
+    // Parse date
+    $date = null;    
+    if (isset($dateParameter) && !empty(trim($dateParameter))) {
+        $date = strtotime($dateParameter);
+    }
+    
+    // Validate date
+    $maximumDate = strtotime(date('Y-m-d'));
+    // TODO: Use config amount of days
+    $minimumDate = $maximumDate - ((60 * 60 * 24 * 14) - 1);
+    if ($date == null || $date == false || $date == '' || $date < $minimumDate || $date > $maximumDate) {
+        // Date couldn't be obtained or is invalid        
+        // TODO: Log warning if debug
+        $date = strtotime(date('Y-m-d'));
+    }
+    
+    // TODO: Log date info if debug
+    ?>
+
     <div class="wrapper container">
         <div class="row">
-            <div class="col-xs-12">
-                <div id="gallery" style="display: none;">
+            <div class="col-xs-12 text-center">
+                <div class="page-header">
+                    <h1>Archive <small><?php echo date('l, d.m.Y', $date); ?></small></h1>
+                </div>
+
+                <div id="gallery" class="gallery">
                     <?php
                     function GetArchiveImages() {
                         return array(
@@ -65,21 +96,27 @@
                         );
                     }
                     
-    
+                    
                     $imageFiles = GetArchiveImages();
                     
                     foreach ($imageFiles as $imageFile) {
                         echo '<img src="'              . $imageFile['thumbnailPath']  . '"' .
-                                  'alt="'              . $imageFile['title']          . '"' .
-                                  'data-image="'       . $imageFile['imagePath']      . '"' .
-                                  'date-description="' . $imageFile['description']    . '">' . PHP_EOL;
+                        'alt="'              . $imageFile['title']          . '"' .
+                        'data-image="'       . $imageFile['imagePath']      . '"' .
+                        'date-description="' . $imageFile['description']    . '">' . PHP_EOL;
                     }             
                     ?>
                 </div>
+
+                <br />
+                <p>
+                    Visit the <a href="index.php">homepage</a> to see a live image.        
+                </p>
             </div>
         </div>
+    </div>
 
-        <?php require("_footer.php") ?>
+    <?php require("_footer.php") ?>
 
     <!-- Scripts -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
