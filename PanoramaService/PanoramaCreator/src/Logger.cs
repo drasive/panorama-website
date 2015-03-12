@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System;
+using NLog;
 
 namespace DimitriVranken.PanoramaCreator
 {
@@ -6,6 +7,7 @@ namespace DimitriVranken.PanoramaCreator
     {
         private static readonly NLog.Logger _default = LogManager.GetCurrentClassLogger();
         private static readonly NLog.Logger _userInterface = LogManager.GetLogger("UserInterface");
+
 
         public static NLog.Logger Default
         {
@@ -15,6 +17,25 @@ namespace DimitriVranken.PanoramaCreator
         public static NLog.Logger UserInterface
         {
             get { return _userInterface; }
+        }
+
+
+        public static void UpdateLogLevel(string loggerPattern, LogLevel logLevel)
+        {
+            foreach (var rule in LogManager.Configuration.LoggingRules)
+            {
+                if (rule.NameMatches(loggerPattern))
+                {
+                    rule.EnableLoggingForLevel(logLevel);
+                }
+            }
+
+            LogManager.ReconfigExistingLoggers();
+        }
+
+        public static void UpdateLogLevel(this NLog.Logger logger, LogLevel logLevel)
+        {
+            UpdateLogLevel(logger.Name, logLevel);
         }
     }
 }

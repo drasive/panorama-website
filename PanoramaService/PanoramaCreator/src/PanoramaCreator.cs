@@ -16,6 +16,7 @@ namespace DimitriVranken.PanoramaCreator
         {
             try
             {
+                Logger.Default.Info("Application started");
                 var stopwatch = Stopwatch.StartNew();
 
                 // Parse parameters
@@ -56,7 +57,7 @@ namespace DimitriVranken.PanoramaCreator
                 // Print done
                 stopwatch.Stop();
                 var executionTime = Math.Round((decimal)stopwatch.ElapsedMilliseconds / 1000, 2);
-                Console.WriteLine("Done ({0} seconds)", executionTime);
+                Logger.UserInterface.Info("Done ({0} seconds)", executionTime);
 #if DEBUG
                 Console.ReadLine();
 #endif
@@ -76,6 +77,10 @@ namespace DimitriVranken.PanoramaCreator
             // Parse options
             CommandLine.Parser.Default.ParseArgumentsStrict(options, Options);
 
+            if (Options.Verbose)
+            {
+                Logger.UserInterface.UpdateLogLevel(NLog.LogLevel.Debug);
+            }
 
             // Log raw options
             Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
