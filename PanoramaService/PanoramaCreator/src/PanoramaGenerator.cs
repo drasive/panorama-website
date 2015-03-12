@@ -34,17 +34,23 @@ namespace DimitriVranken.PanoramaCreator
             return ChangeImageResolution(image, scalingFactor);
         }
 
+        private static Bitmap ConvertImageFormat(Image image, PixelFormat format)
+        {
+            var newImage = new Bitmap(image.Width, image.Height, format);
+            using (var graphics = Graphics.FromImage(newImage))
+            {
+                graphics.DrawImage(image, new Rectangle(0, 0, newImage.Width, newImage.Height));
+            }
+
+            return newImage;
+        }
+
         private static Bitmap MergeImages(Bitmap image1, Bitmap image2)
         {
-            // TODO: Move resolution change to GeneratePanoramicImage
-            const int maximumResolution = 15000; //1920
-            var image1LowResolution = ReduceImageResolution(image1, maximumResolution);
-            var image2LowResolution = ReduceImageResolution(image2, maximumResolution);
-
             // Detect feature points using Surf Corners Detector
             var featureDetector = new SpeededUpRobustFeaturesDetector();
-            var featurePoints1 = featureDetector.ProcessImage(image1LowResolution).ToArray();
-            var featurePoints2 = featureDetector.ProcessImage(image2LowResolution).ToArray();
+            var featurePoints1 = featureDetector.ProcessImage(image1).ToArray();
+            var featurePoints2 = featureDetector.ProcessImage(image2).ToArray();
 
             // Match feature points using a k-NN
             var featureMatcher = new KNearestNeighborMatching(5);
@@ -58,15 +64,8 @@ namespace DimitriVranken.PanoramaCreator
             var homography = homographyEstimator.Estimate(correlationPoints1, correlationPoints2);
 
             // Blend the second image using the homography
-            var blend = new Blend(homography, image1LowResolution);
-            var mergedImage = blend.Apply(image2LowResolution);
-
-            // Dispose bitmaps
-            image1LowResolution.Dispose();
-            image2LowResolution.Dispose();
-
-            // Return
-            return mergedImage;
+            var blend = new Blend(homography, image1);
+            return blend.Apply(image2);
         }
 
 
@@ -74,9 +73,13 @@ namespace DimitriVranken.PanoramaCreator
         {
             var imageFilesList = imageFiles as IList<string> ?? imageFiles.ToList();
 
-            // Load bitmaps
+            // Load raw bitmaps
             Logger.Default.Debug("PanoramicGenerator: Loading bitmaps");
-            var images = imageFilesList.Select(imageFile => new Bitmap(imageFile)).ToList();
+            var imagesRaw = imageFilesList.Select(imageFile => new Bitmap(imageFile)).ToList();
+
+            // Process raw bitmaps
+            var images = imagesRaw.Select(image => ReduceImageResolution(image, 1920)).ToList();
+            images = images.Select(image => ConvertImageFormat(image, PixelFormat.Format24bppRgb)).ToList();
 
             // Merge first two images
             Logger.UserInterface.Info("Merging images 1/{0}", imageFilesList.Count() - 1);
@@ -91,13 +94,20 @@ namespace DimitriVranken.PanoramaCreator
 
             // Save panoramic image
             Logger.Default.Info("PanoramicGenerator: Saving the panoramic image to '{0}'", outputFile);
+            panoramicImage = ReduceImageResolution(panoramicImage, 10000);
             panoramicImage.Save(outputFile, ImageFormat.Png);
 
             // Dispose bitmaps
+            foreach (var imageRaw in images)
+            {
+                imageRaw.Dispose();
+            }
+
             foreach (var image in images)
             {
                 image.Dispose();
             }
+
             panoramicImage.Dispose();
         }
     }
