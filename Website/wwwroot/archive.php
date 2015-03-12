@@ -31,10 +31,13 @@
     require("_functions.php");
     
     SetActivePage('archive');    
-    require("_header.php")
+    require("_header.php");
+    
+    include("_noscript_error.html");
     ?>
 
     <div class="container">
+    <div class="wrapper container">
         <div class="row">
             <div class="col-xs-12">
                 <div id="gallery" style="display: none;">
@@ -84,6 +87,7 @@
     <script src="plugins/unitegallery/js/unitegallery.min.js"></script>
     <script src="plugins/unitegallery/themes/grid/ug-theme-grid.js"></script>
 
+    <script src="js/noscript.js"></script>
     <script src="js/archive.js"></script>
 </body>
 </html>
