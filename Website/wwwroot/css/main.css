@@ -1,0 +1,13 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+img.fullscreen {
+    width: 95%;
+}
+
+/* Makes Bootstrap drop down buttons click-able */
+ul.nav li.dropdown:hover ul.dropdown-menu {
+    display: block;
+}
