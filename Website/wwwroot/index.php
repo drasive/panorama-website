@@ -31,7 +31,9 @@
     require("_functions.php");
     
     SetActivePage('index');    
-    require("_header.php")
+    require("_header.php");
+    
+    include("_noscript_warning.html");
     ?>
 
     <div class="container">
