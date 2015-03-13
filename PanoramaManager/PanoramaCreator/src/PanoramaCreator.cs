@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
@@ -13,6 +14,7 @@ namespace DimitriVranken.PanoramaCreator
         // TODO: Make max. image and pan resolution for processing configurable
         // TODO: Put parameter defaults in config (when/ where applicable)
         // TODO: Set image quality etc. (p. 57 manual, check default values)
+        // TODO: Ask instead of error without -f
 
         // TODO: Manual: Camera may not be same settings/ position after script was run (with details?)
 
@@ -26,13 +28,6 @@ namespace DimitriVranken.PanoramaCreator
             Console.WriteLine("{0}", assemblyInfo.LegalCopyright);
 
             Console.WriteLine();
-        }
-
-        private static string[] ApplyConfiguration(string[] options)
-        {
-            // TODO: Implement
-
-            return options;
         }
 
         private static bool ParseOptions(string[] options)
@@ -235,7 +230,6 @@ namespace DimitriVranken.PanoramaCreator
                 PrintHeading();
 
                 // Parse parameters
-                // TODO: Apply configuration
                 if (!ParseOptions(args))
                 {
                     Environment.Exit(1);
