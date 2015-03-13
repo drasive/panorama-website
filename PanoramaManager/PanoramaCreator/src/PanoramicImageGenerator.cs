@@ -89,8 +89,8 @@ namespace DimitriVranken.PanoramaCreator
                     if (!File.Exists(imageFile))
                     {
 #if DEBUG
-                    Logger.UserInterface.Warn("Warning: The snapshot {0} doesn't exist and won't be merged into the panoramic image", imageFile);
-                    continue;
+                        Logger.UserInterface.Warn("Warning: The snapshot {0} doesn't exist and won't be merged into the panoramic image", imageFile);
+                        continue;
 #else
                         throw new FileNotFoundException(String.Format(
                                 "The snapshot '{0}' doesn't exist and can't be merged into the panoramic image.",
@@ -126,6 +126,12 @@ namespace DimitriVranken.PanoramaCreator
                 panoramicImage = ReduceImageResolution(panoramicImage, maximumPanoramaResolution);
 
                 // Save panoramic image
+                if (File.Exists(outputFile) &&
+                    !Common.AskForUserConfirmation(String.Format("The file '{0}' already exists. Do you want to override it?", outputFile), true))
+                {
+                    return;
+                }
+
                 Logger.Default.Info("PanoramicGenerator: Saving the panoramic image to '{0}'", outputFile);
                 panoramicImage.Save(outputFile, ImageFormat.Png);
             }

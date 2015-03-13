@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace DimitriVranken.PanoramaCreator
@@ -39,7 +40,6 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
-
         public static string GetTemporaryFolder()
         {
             var temporaryFolder = Path.GetTempPath();
@@ -49,6 +49,65 @@ namespace DimitriVranken.PanoramaCreator
 
 
             return Path.Combine(temporaryFolder, programSubfolder);
+        }
+
+
+        public static bool AskForUserConfirmation(string message, bool? defaultOption)
+        {
+            // Build options string
+            string options;
+            if (!defaultOption.HasValue)
+            {
+                options = "[y/n]";
+            }
+            else if (defaultOption.Value == true)
+            {
+                options = "[Y/n]";
+            }
+            else
+            {
+                options = "[y/N]";
+            }
+
+            // Ask for confirmation
+            var question = String.Format("{0} {1}: ", message, options);
+            Logger.Default.Debug("Confirmation: " + question);
+            while (true)
+            {
+                Console.Write(question);
+
+                // Use automatic answer
+                if (PanoramaCreator.Options.Force)
+                {
+                    Logger.Default.Debug("Confirmation: Answered with 'yes' (automatically)");
+                    Console.WriteLine("y (automatically accepting)");
+
+                    return true;
+                }
+
+                // Parse answer
+                var input = Console.ReadLine();
+                bool? answer = null;
+                if (string.IsNullOrEmpty(input) && defaultOption.HasValue)
+                {
+                    answer = defaultOption.Value;
+                }
+                if (input != null && (input.ToLower() == "y" || input.ToLower() == "yes"))
+                {
+                    answer = true;
+                }
+                if (input != null && (input.ToLower() == "n" || input.ToLower() == "no"))
+                {
+                    answer = false;
+                }
+
+                // Return answer
+                if (answer.HasValue)
+                {
+                    Logger.Default.Debug("Confirmation: Answered with '{0}'", answer.Value ? "yes" : "no");
+                    return answer.Value;
+                }
+            }
         }
     }
 }

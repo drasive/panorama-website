@@ -46,10 +46,9 @@ namespace DimitriVranken.PanoramaCreator
                 return null;
             }
 
-
             var requestUrl = UrlProtocol + IpAddress + UrlCommandFolder + commandUrl;
 
-            Logger.Default.Info("Camera: Executing request '{0}'", requestUrl);
+            Logger.Default.Trace("Camera: Executing request '{0}'", requestUrl);
             var request = WebRequest.Create(requestUrl);
             request.Timeout = 20 * 1000;
             if (Proxy != null)
@@ -58,7 +57,7 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             var response = (HttpWebResponse)request.GetResponse();
-            Logger.Default.Debug("Camera: Response received (HTTP {0})", response.StatusCode);
+            Logger.Default.Trace("Camera: Response received (HTTP {0})", response.StatusCode);
 
             System.Threading.Thread.Sleep(waitTime);
             return response;
@@ -68,9 +67,8 @@ namespace DimitriVranken.PanoramaCreator
         {
             if (NoNetwork)
             {
-                return false;
+                return true;
             }
-
 
             using (var response = ExecuteCommand(commandUrl, 3 * 1000))
             {
@@ -91,7 +89,7 @@ namespace DimitriVranken.PanoramaCreator
                             bytesRead = inputStream.Read(buffer, 0, buffer.Length);
                             outputStream.Write(buffer, 0, bytesRead);
                         } while (bytesRead != 0);
-                        Logger.Default.Error("Camera: Downloaded response of command '{0}'", commandUrl);
+                        Logger.Default.Trace("Camera: Downloaded response of command '{0}'", commandUrl);
                     }
 
                     // The file was downloaded successfully
@@ -117,7 +115,10 @@ namespace DimitriVranken.PanoramaCreator
 
             // Execute command
             Logger.UserInterface.Debug("Camera: Taking an image");
-            ExecuteCommand(commandUrl, destinationFile);
+            if (!ExecuteCommand(commandUrl, destinationFile))
+            {
+                throw new Exception("Camera: Failed to take an image");
+            }
         }
 
         public void Rotate(CameraDirection direction)

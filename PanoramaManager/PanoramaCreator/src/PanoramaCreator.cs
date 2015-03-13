@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
@@ -10,15 +9,13 @@ namespace DimitriVranken.PanoramaCreator
     static class PanoramaCreator
     {
         // TODO: _Change -o parameter to folder, use for example images
-        // TODO: _Check rights to access camera
         // TODO: Make max. image and pan resolution for processing configurable
-        // TODO: Put parameter defaults in config (when/ where applicable)
-        // TODO: Set image quality etc. (p. 57 manual, check default values)
-        // TODO: Ask instead of error without -f
+        // TODO: (Network) _Check rights to access camera
+        // TODO: (Network) Set image quality etc. (p. 57 manual, check default values)
 
         // TODO: Manual: Camera may not be same settings/ position after script was run (with details?)
 
-        static readonly Options Options = new Options();
+        public static readonly Options Options = new Options();
         static Camera _camera;
 
         private static void PrintHeading()
@@ -71,11 +68,6 @@ namespace DimitriVranken.PanoramaCreator
 
             // ---output
             Options.OutputParsed = new FileInfo(Options.Output);
-            if (Options.Force == false && Options.OutputParsed.Exists)
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The output file already exists. Use -f to force an overwrite");
-            }
 
             // ---proxy-address
             if (!string.IsNullOrEmpty(Options.ProxyAddress))
