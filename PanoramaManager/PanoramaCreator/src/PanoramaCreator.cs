@@ -28,6 +28,13 @@ namespace DimitriVranken.PanoramaCreator
             Console.WriteLine();
         }
 
+        private static string[] ApplyConfiguration(string[] options)
+        {
+            // TODO: Implement
+
+            return options;
+        }
+
         private static bool ParseOptions(string[] options)
         {
             // Parse options
@@ -228,6 +235,7 @@ namespace DimitriVranken.PanoramaCreator
                 PrintHeading();
 
                 // Parse parameters
+                // TODO: Apply configuration
                 if (!ParseOptions(args))
                 {
                     Environment.Exit(1);
