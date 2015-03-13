@@ -1,3 +1,8 @@
+<?php 
+require_once('php/UiHelper.php');
+require_once('php/ConfigurationReader.php');
+?>
+
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
         <div class="navbar-header">
@@ -11,21 +16,19 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="<?php CheckNavbarLinkActive('index'); ?>"><a href="index.php">Live Image</a></li>
-                <li class="<?php CheckNavbarLinkActive('archive'); ?> dropdown">
+                <li class="<?php UiHelper::CheckNavbarLinkActive('index'); ?>"><a href="index.php">Live Image</a></li>
+                <li class="<?php UiHelper::CheckNavbarLinkActive('archive'); ?> dropdown">
                     <a href="archive.php">Archive <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         <?php
-                        // TODO: List days without images?                        
-                        
                         $currentDay = strtotime(date('Y-m-d'));
-                        // TODO: Use config amount of days
-                        for ($dayIndex = 0; $dayIndex < 14; $dayIndex++) {
+                        $archiveDuration = ConfigurationReader::getArchiveDuration();
+                        for ($dayIndex = 0; $dayIndex < $archiveDuration; $dayIndex++) {
                             // Output link
                             echo '<li><a href="archive.php?date=' . date('Y-m-d', $currentDay) . '">' . date('D, d.m.Y', $currentDay) . '</a></li>';
                             
                             // Output divider between weeks
-                            if (date('N', $currentDay) == 1) {
+                            if (date('N', $currentDay) == 1 && $dayIndex < $archiveDuration - 1) {
                                 echo '<li class="divider"></li>';
                             }
                             
@@ -35,7 +38,7 @@
                         ?>
                     </ul>
                 </li>
-                <li class="<?php CheckNavbarLinkActive('about'); ?>"><a href="about.php">About</a></li>
+                <li class="<?php UiHelper::CheckNavbarLinkActive('about'); ?>"><a href="about.php">About</a></li>
             </ul>
         </div>
     </div>

@@ -25,17 +25,14 @@
     <script src="bower_components/respond/dest/respond.min.js"></script>
 </head>
 <body>
-    <!--[if lt IE 8]>
-        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-
     <?php
-    require("_functions.php");
+    require("_browserupgrade.php");
     
-    SetActivePage('archive');    
+    require_once("php/UiHelper.php");
+    UiHelper::SetActivePage('archive');    
     require("_header.php");
     
-    include("_noscript_error.html");
+    require("_noscript-error.html");
     ?>
 
     <?php
@@ -52,16 +49,27 @@
     }
     
     // Validate date
-    $maximumDate = strtotime(date('Y-m-d'));
-    // TODO: Use config amount of days
-    $minimumDate = $maximumDate - ((60 * 60 * 24 * 14) - 1);
-    if ($date == null || $date == false || $date == '' || $date < $minimumDate || $date > $maximumDate) {
-        // Date couldn't be obtained or is invalid        
-        // TODO: Log warning if debug
-        $date = strtotime(date('Y-m-d'));
+    $archiveDuration = ConfigurationReader::getArchiveDuration();
+    
+    $maximumDate = strtotime(date('Y-m-d'));    
+    $minimumDate = $maximumDate - ((60 * 60 * 24 * $archiveDuration) - 1);    
+    if ($date == null || $date == false || $date == '' ||
+        $date < $minimumDate || $date > $maximumDate) {
+        // Date couldn't be obtained or is invalid
+        $defaultDate = strtotime(date('Y-m-d'));
+        $date = $defaultDate;
+        
+        if (ConfigurationReader::getDebugMode() == true) {
+            echo 'Debug: "date" HTTP parameter not existing or invalid, ' . 
+                 'using the default value "' . date('Y-m-d', $defaultDate) . '"' . 
+                 '<br />' . PHP_EOL;
+        }
     }
     
-    // TODO: Log date info if debug
+    if (ConfigurationReader::getDebugMode() == true) {
+        echo 'Debug: "date" parameter = "' . date('Y-m-d', $date) . '"' .
+             '<br />' . PHP_EOL;
+    }
     ?>
 
     <div class="wrapper container">
@@ -116,7 +124,7 @@
         </div>
     </div>
 
-    <?php require("_footer.php") ?>
+    <?php require("_footer.php"); ?>
 
     <!-- Scripts -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>

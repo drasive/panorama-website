@@ -23,15 +23,13 @@
     <script src="bower_components/respond/dest/respond.min.js"></script>
 </head>
 <body>
-    <!--[if lt IE 8]>
-        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-
     <?php
-    require("_functions.php");
+    require("_browserupgrade.php");
     
-    SetActivePage('about');
-    require("_header.php")
+    require_once("php/UiHelper.php");
+    UiHelper::SetActivePage('about');
+    
+    require("_header.php");
     ?>
 
     <div class="container">
@@ -46,13 +44,15 @@
                 <h2>What</h2>
 
                 <p>
-                    A website where people can view live and archived panoramic images generated from snapshots taken by a network camera.
+                    A website where people can view live and archived panoramic images
+                    generated from snapshots taken by a network camera.
                 </p>
             </div>
             <div class="col-sm-6">
                 <h2>Why</h2>
                 <p>
-                    The creation of this website and the program to generate the panoramic images was a school project for module #152 at the vocational college <a href="http://home.gibm.ch/">GIBM</a> (Switzerland).
+                    The creation of this website and the program to generate the panoramic images was a school project
+                    for module #152 at the vocational college <a href="http://home.gibm.ch/">GIBM</a> (Switzerland).
                 </p>
             </div>
         </div>
@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    <?php require("_footer.php") ?>
+    <?php require("_footer.php"); ?>
 
     <!-- Scripts -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>

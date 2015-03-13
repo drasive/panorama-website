@@ -22,18 +22,15 @@
     <script src="bower_components/modernizr/modernizr.js"></script>
     <script src="bower_components/respond/dest/respond.min.js"></script>
 </head>
-<body>
-    <!--[if lt IE 8]>
-        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-
     <?php
-    require("_functions.php");
+    require("_browserupgrade.php");
     
-    SetActivePage('index');
+    require_once("php/UiHelper.php");    
+    UiHelper::SetActivePage('index');
+    
     require("_header.php");
     
-    include("_noscript_warning.html");
+    require("_noscript-warning.html");
     ?>
 
     <div class="container">
@@ -46,7 +43,8 @@
                 </p>
                 <p>
                     <img class="image-fullscreen image-zoom"
-                        src="http://placehold.it/1280x720" data-zoom-image="http://placehold.it/3840x2160" />
+                        src="http://placehold.it/1280x720"
+                        data-zoom-image="http://placehold.it/3840x2160" />
                 </p>
 
                 <p>
@@ -56,7 +54,7 @@
         </div>
     </div>
 
-    <?php require("_footer.php") ?>
+    <?php require("_footer.php"); ?>
 
     <!-- Scripts -->
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
