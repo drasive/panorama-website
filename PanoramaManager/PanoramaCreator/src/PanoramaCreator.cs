@@ -8,7 +8,13 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: Change -o parameter to folder, use for example images
+        // TODO: _Change -o parameter to folder, use for example images
+        // TODO: _Check rights to access camera
+        // TODO: Make max. image and pan resolution for processing configurable
+        // TODO: Put parameter defaults in config (when/ where applicable)
+        // TODO: Set image quality etc. (p. 57 manual, check default values)
+
+        // TODO: Manual: Camera may not be same settings/ position after script was run (with details?)
 
         static readonly Options Options = new Options();
         static Camera _camera;
