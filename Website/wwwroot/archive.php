@@ -83,42 +83,30 @@
                     <h1>Archive <small><?php echo date('l, d.m.Y', $date); ?></small></h1>
                 </div>
 
-                <div id="gallery" class="gallery">
-                    <?php
-                    function GetArchiveImages() {
-                        return array(
-                            array(
-                                'imagePath'     => 'http://placehold.it/300x150',
-                                'thumbnailPath' => 'http://placehold.it/30x15',
-                                'title'         => 'title',
-                                'description'   => 'desc'
-                            ),
-                            array(
-                                'imagePath'     => 'http://placehold.it/1000x1000',
-                                'thumbnailPath' => 'http://placehold.it/2000x2000',
-                                'title'         => 'title',
-                                'description'   => 'desc'
-                            ),
-                            array(
-                                'imagePath'     => 'http://placehold.it/1280x720',
-                                'thumbnailPath' => 'http://placehold.it/480x360',
-                                'title'         => 'title',
-                                'description'   => 'desc'
-                            )
-                        );
+                <?php
+                require_once("php/ImageReader.php");
+                
+                $images = ImageReader::GetImages($date);
+                if (!is_null($images) && count($images) > 0) {
+                    echo '<div id="gallery" class="gallery">';
+                    
+                    foreach ($images as $image) {
+                        echo '<img src="'        . $image['thumbnailPath'] . '"' .
+                                  'data-image="' . $image['imagePath']     . '"' .
+                                  'alt="'        . $image['title']         . '">' . PHP_EOL;
+                                  
                     }
                     
-                    
-                    $imageFiles = GetArchiveImages();
-                    
-                    foreach ($imageFiles as $imageFile) {
-                        echo '<img src="'    . $imageFile['thumbnailPath']  . '"' .
-                        'alt="'              . $imageFile['title']          . '"' .
-                        'data-image="'       . $imageFile['imagePath']      . '"' .
-                        'date-description="' . $imageFile['description']    . '">' . PHP_EOL;
-                    }             
-                    ?>
-                </div>
+                    echo '</div>';
+                }
+                else {
+                    // Output message
+                    echo '<p>' .
+                             'There are no archived images for this day.<br />' .
+                             'You can try another day by using the drop-down menu in the navigation bar.' .
+                         '</p>';
+                }
+                ?>
 
                 <br />
                 <p>

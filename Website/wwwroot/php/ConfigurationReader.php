@@ -9,7 +9,8 @@ class ConfigurationReader  {
     
     protected static $applicationSection = 'application';
     protected static $imageFolder = 'imageFolder';
-    protected static $imageFilenameFormat = 'imageFilenameFormat';
+    protected static $imageSubfolderFormat = 'imageSubfolderFormat';
+    protected static $imageFileFormat = 'imageFileFormat';
     protected static $archiveDuration = 'archiveDuration';
     protected static $archiveFrequency = 'archiveFrequency';
     
@@ -19,25 +20,29 @@ class ConfigurationReader  {
     }
     
     // Release section
-    public static function getDebugMode() { 
+    public static function getDebugMode() {
         return self::getConfiguration()[self::$releaseSection][self::$debugMode];
     }
     
     // Application section
-    public static function getImageFolder() { 
+    public static function getImageFolder() {
         return self::getConfiguration()[self::$applicationSection][self::$imageFolder];
     }
     
-    public static function getImageFilenameFormat() { 
-        return self::getConfiguration()[self::$applicationSection][self::$imageFilenameFormat];
+    public static function getImageSubfolderFormat() {
+        return self::getConfiguration()[self::$applicationSection][self::$imageSubfolderFormat];
+    }
+    
+    public static function getImageFileFormat() {
+        return self::getConfiguration()[self::$applicationSection][self::$imageFileFormat];
     }
     
     
-    public static function getArchiveDuration() { 
+    public static function getArchiveDuration() {
         return self::getConfiguration()[self::$applicationSection][self::$archiveDuration];
     }
     
-    public static function getArchiveFrequency() { 
+    public static function getArchiveFrequency() {
         return self::getConfiguration()[self::$applicationSection][self::$archiveFrequency];
     }
     

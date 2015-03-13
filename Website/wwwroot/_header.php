@@ -26,6 +26,7 @@ require_once('php/ConfigurationReader.php');
                         <?php
                         $currentDay = strtotime(date('Y-m-d'));
                         $archiveDuration = ConfigurationReader::getArchiveDuration();
+                        
                         for ($dayIndex = 0; $dayIndex < $archiveDuration; $dayIndex++) {
                             // Output link                            
                             $dateFormatted = date('D, d.m.Y', $currentDay);

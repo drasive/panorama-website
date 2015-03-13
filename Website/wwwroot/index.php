@@ -43,28 +43,29 @@
                 <?php                
                 require_once("php/ImageReader.php");
                 
-                $image = ImageReader::GetLastPanoramicImage();                
+                $image = ImageReader::GetLastImage();
                 if (!is_null($image)) {
+                    // Output info
+                    $creationDateFormatted = date('l, H:i:s d.m.Y', $image['creationDate']);
+                    $ageFormatted = UiHelper::GetTimeDifferenceString(time(), $image['creationDate']);
+                    echo '<p>' . 
+                             'This is a live panoramic image. ' . 
+                             'It was last refreshed on ' . $creationDateFormatted . ' (' . $ageFormatted . ' ago).' .
+                         '</p>';
+                    
+                    // Output image
                     // Required for the zoom plugin to work correctly
                     $imagePathFormatted = str_replace('\\', '/', $image['imagePath']);
                     $thumbnailPathFormatted = str_replace('\\', '/', $image['thumbnailPath']);
                     
-                    // Output info
-                    $creationDateFormatted = date('l, d.m.Y', $image['creationDate']);
-                    $ageFormatted = UiHelper::GetTimeDifferenceString( time(), $image['creationDate']);
-                    echo '<p>' . 
-                             'This is a live panoramic image. ' . 
-                             'It was last refreshed on ' . $creationDateFormatted .  ' (' .  $ageFormatted . ' ago).' .
-                         '</p>';
-                    
-                    // Output panoramic image
                     echo '<p>' . 
                              '<img class="image-fullscreen image-zoom"' .
-                                  'src="'             . $thumbnailPathFormatted . '" ' .
-                                  'data-zoom-image="' . $imagePathFormatted     . '" />' .
+                                   'src="'             . $thumbnailPathFormatted . '" ' .
+                                   'data-zoom-image="' . $imagePathFormatted     . '" />' .
                          '</p>';
                 }
                 else {
+                    // Output message
                     echo '<p>' . 
                              'Currently, there is no live panoramic image available.' .
                          '</p>';
