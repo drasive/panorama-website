@@ -112,7 +112,7 @@
                     $imageFiles = GetArchiveImages();
                     
                     foreach ($imageFiles as $imageFile) {
-                        echo '<img src="'              . $imageFile['thumbnailPath']  . '"' .
+                        echo '<img src="'    . $imageFile['thumbnailPath']  . '"' .
                         'alt="'              . $imageFile['title']          . '"' .
                         'data-image="'       . $imageFile['imagePath']      . '"' .
                         'date-description="' . $imageFile['description']    . '">' . PHP_EOL;

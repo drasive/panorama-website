@@ -8,7 +8,8 @@ class ConfigurationReader  {
     protected static $debugMode = 'debugMode';
     
     protected static $applicationSection = 'application';
-    protected static $panoramicImagesFolder = 'panoramicImagesFolder';
+    protected static $imageFolder = 'imageFolder';
+    protected static $imageFilenameFormat = 'imageFilenameFormat';
     protected static $archiveDuration = 'archiveDuration';
     protected static $archiveFrequency = 'archiveFrequency';
     
@@ -23,9 +24,14 @@ class ConfigurationReader  {
     }
     
     // Application section
-    public static function getPanoramicImagesFolder() { 
-        return self::getConfiguration()[self::$applicationSection][self::$panoramicImagesFolder];
+    public static function getImageFolder() { 
+        return self::getConfiguration()[self::$applicationSection][self::$imageFolder];
     }
+    
+    public static function getImageFilenameFormat() { 
+        return self::getConfiguration()[self::$applicationSection][self::$imageFilenameFormat];
+    }
+    
     
     public static function getArchiveDuration() { 
         return self::getConfiguration()[self::$applicationSection][self::$archiveDuration];

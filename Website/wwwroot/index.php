@@ -22,15 +22,16 @@
     <script src="bower_components/modernizr/modernizr.js"></script>
     <script src="bower_components/respond/dest/respond.min.js"></script>
 </head>
+<body>
     <?php
     require("_browserupgrade.php");
-    
+
     require_once("php/UiHelper.php");    
     UiHelper::SetActivePage('index');
     UiHelper::SetActiveSubpage(null);
-    
+
     require("_header.php");
-    
+
     require("_noscript-warning.html");
     ?>
 
@@ -39,14 +40,36 @@
             <div class="col-xs-12 text-center">
                 <h1>Live Image</h1>
 
-                <p>
-                    This is a live panoramic image. It was last refreshed at [x] ([x] ago).
-                </p>
-                <p>
-                    <img class="image-fullscreen image-zoom"
-                        src="http://placehold.it/1280x720"
-                        data-zoom-image="http://placehold.it/3840x2160" />
-                </p>
+                <?php                
+                require_once("php/ImageReader.php");
+                
+                $image = ImageReader::GetLastPanoramicImage();                
+                if (!is_null($image)) {
+                    // Required for the zoom plugin to work correctly
+                    $imagePathFormatted = str_replace('\\', '/', $image['imagePath']);
+                    $thumbnailPathFormatted = str_replace('\\', '/', $image['thumbnailPath']);
+                    
+                    // Output info
+                    $creationDateFormatted = date('l, d.m.Y', $image['creationDate']);
+                    $ageFormatted = UiHelper::GetTimeDifferenceString( time(), $image['creationDate']);
+                    echo '<p>' . 
+                             'This is a live panoramic image. ' . 
+                             'It was last refreshed on ' . $creationDateFormatted .  ' (' .  $ageFormatted . ' ago).' .
+                         '</p>';
+                    
+                    // Output panoramic image
+                    echo '<p>' . 
+                             '<img class="image-fullscreen image-zoom"' .
+                                  'src="'             . $thumbnailPathFormatted . '" ' .
+                                  'data-zoom-image="' . $imagePathFormatted     . '" />' .
+                         '</p>';
+                }
+                else {
+                    echo '<p>' . 
+                             'Currently, there is no live panoramic image available.' .
+                         '</p>';
+                }
+                ?>
 
                 <p>
                     Visit the <a href="archive.php">archive</a> to see older images.                   
