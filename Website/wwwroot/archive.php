@@ -26,16 +26,8 @@
 </head>
 <body>
     <?php
-    require("_browserupgrade.php");
+    require_once("php/ConfigurationReader.php");
     
-    require_once("php/UiHelper.php");
-    UiHelper::SetActivePage('archive');    
-    require("_header.php");
-    
-    require("_noscript-error.html");
-    ?>
-
-    <?php
     // Get date
     $dateParameter = null;    
     if(isset($_GET['date'])) {
@@ -61,15 +53,27 @@
         
         if (ConfigurationReader::getDebugMode() == true) {
             echo 'Debug: "date" HTTP parameter not existing or invalid, ' . 
-                 'using the default value "' . date('Y-m-d', $defaultDate) . '"' . 
-                 '<br />' . PHP_EOL;
+            'using the default value "' . date('Y-m-d', $defaultDate) . '"' . 
+            '<br />' . PHP_EOL;
         }
     }
     
     if (ConfigurationReader::getDebugMode() == true) {
         echo 'Debug: "date" parameter = "' . date('Y-m-d', $date) . '"' .
-             '<br />' . PHP_EOL;
+        '<br />' . PHP_EOL;
     }
+    ?>
+
+    <?php
+    require("_browserupgrade.php");
+    
+    require_once("php/UiHelper.php");
+    UiHelper::SetActivePage('archive');
+    UiHelper::SetActiveSubpage(date('Y-m-d', $date));
+    
+    require("_header.php");
+    
+    require("_noscript-error.html");
     ?>
 
     <div class="wrapper container">

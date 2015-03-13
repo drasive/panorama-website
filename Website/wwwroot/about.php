@@ -28,6 +28,7 @@
     
     require_once("php/UiHelper.php");
     UiHelper::SetActivePage('about');
+    UiHelper::SetActiveSubpage(null);
     
     require("_header.php");
     ?>

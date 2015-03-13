@@ -27,6 +27,7 @@
     
     require_once("php/UiHelper.php");    
     UiHelper::SetActivePage('index');
+    UiHelper::SetActiveSubpage(null);
     
     require("_header.php");
     
