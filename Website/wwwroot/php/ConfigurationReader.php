@@ -6,6 +6,7 @@ class ConfigurationReader  {
     
     protected static $releaseSection = 'release';
     protected static $debugMode = 'debugMode';
+    protected static $testImages = 'testImages';
     
     protected static $applicationSection = 'application';
     protected static $imageFolder = 'imageFolder';
@@ -22,6 +23,10 @@ class ConfigurationReader  {
     // Release section
     public static function getDebugMode() {
         return self::getConfiguration()[self::$releaseSection][self::$debugMode];
+    }
+    
+    public static function getTestImages() {
+        return self::getConfiguration()[self::$releaseSection][self::$testImages];
     }
     
     // Application section

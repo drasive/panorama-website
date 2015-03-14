@@ -54,7 +54,7 @@
                          '</p>';
                     
                     // Output image
-                    // Required for the zoom plugin to work correctly
+                    // Path replacement required for the zoom plugin to work correctly
                     $imagePathFormatted = str_replace('\\', '/', $image['imagePath']);
                     $thumbnailPathFormatted = str_replace('\\', '/', $image['thumbnailPath']);
                     

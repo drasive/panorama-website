@@ -17,7 +17,7 @@ class ImageReader  {
     
     
     public static function GetLastImage() {
-        if (ConfigurationReader::getDebugMode() == true) {
+        if (ConfigurationReader::getTestImages() == true) {
             // Return test image
             return array(
                 'imagePath'     => 'http://placehold.it/3840x2160',
@@ -26,17 +26,30 @@ class ImageReader  {
             ); 
         }
         
-        // Search for all current, non-archived panoramic images (excluding thumbnails)
+        // Get all current panoramic images (sorted so new images are first, excluding thumbnails)
         $imageFolder = ConfigurationReader::getImageFolder() . DIRECTORY_SEPARATOR;
-        $images = array_filter(glob($imageFolder . '*.png'), function($filePath) {
+        $imageFiles = array_filter(glob($imageFolder . '*.png'), function($filePath) {
             $fileName = pathinfo($filePath)['filename'];
             
             // Return true if the filename doesn't contain "thumb"
             return !strpos(strtolower($fileName), 'thumb') !== false;
         });
+  
+        // Remove gaps in array keys (created by filtering)
+        $imageFiles = array_values(array_filter($imageFiles));
+        
+        // TODO: Refactor into logging
+        if (ConfigurationReader::getDebugMode() == true) {
+            echo '[DEBUG] Images (' . count($imageFiles) . '): ' . print_r($imageFiles, true) . PHP_EOL;
+        }
+        
+        if (count($imageFiles) === 0) {
+            // No images
+            return null;
+        }
         
         // Use the newest one (list sorted so new images are first)
-        $imagePath = $images[count($images)];
+        $imagePath = $imageFiles[count($imageFiles) - 1];
         
         if (!file_exists($imagePath)) {
             return null;
@@ -53,8 +66,8 @@ class ImageReader  {
             );
     }
     
-    public static function GetImages($date) {
-        if (ConfigurationReader::getDebugMode() == true) {
+    public static function GetArchiveImages($date) {
+        if (ConfigurationReader::getTestImages() == true) {
             // Return test images
             return array(
                 array(
@@ -78,13 +91,14 @@ class ImageReader  {
         // Check if images were archived that day
         $imageFolder = ConfigurationReader::getImageFolder() . DIRECTORY_SEPARATOR;
         $imageSubfolderFormat = ConfigurationReader::getImageSubfolderFormat();
-        $imageSubfolder = $imageFolder . DIRECTORY_SEPARATOR . date($imageSubfolderFormat, $date) . DIRECTORY_SEPARATOR;        
+        $imageSubfolder = $imageFolder . date($imageSubfolderFormat, $date) . DIRECTORY_SEPARATOR;        
         
         if (!file_exists($imageSubfolder) || !is_dir($imageSubfolder)) {
+            // No archive folder for that day
             return array();
         }
         
-        // Read all archived images for that day (sorted so new images are first)
+        // Get all archived images for that day (sorted so new images are first, excluding thumbnails)
         $imageFiles = array_filter(glob($imageSubfolder . '*.png'), function($filePath) {
             $fileName = pathinfo($filePath)['filename'];
             
@@ -92,22 +106,24 @@ class ImageReader  {
             return !strpos(strtolower($fileName), 'thumb') !== false;
         });
         
-        // TODO: DEBUG Remove. Only works when array_reverse is called?
-        echo '<br />COUNT: ' . count($imageFiles) . '<br />';
-        print_r($imageFiles);
-        $imageFiles = array_reverse($imageFiles);
-        $imageFiles = array_reverse($imageFiles);
+        // Remove gaps in array keys (created by filtering)
+        $imageFiles = array_values(array_filter($imageFiles));
         
-        // Filter images based on time between creation
-        // TODO: DEBUG
-        // TODO: Use array_filter()?
-        echo '<br />COUNT: ' . count($imageFiles) . '<br />';
-        print_r($imageFiles);
+        if (count($imageFiles) === 0) {
+            // No images archived for that day
+            return array();
+        }
         
+        // TODO: Refactor into logging
+        if (ConfigurationReader::getDebugMode() == true) {
+            echo '[DEBUG] Images (' . count($imageFiles) . '): ' . print_r($imageFiles, true) . PHP_EOL;
+        }
+        
+        // Filter images based on time between creation        
         $archiveFrequency = ConfigurationReader::getArchiveFrequency() * 60;
         $imageFilesFiltered = array();
         $lastCreationDate = null;
-        for ($imageIndex = 0; $imageIndex < count($imageFiles); $imageIndex++) {
+        for ($imageIndex = 0; $imageIndex < count($imageFiles) - 1; $imageIndex++) {
             $currentImage = $imageFiles[$imageIndex];
             $currentCreationDate = self::ParseCreationDate($currentImage);
             
@@ -118,11 +134,6 @@ class ImageReader  {
                 $lastCreationDate = $currentCreationDate;
             }
         }
-        
-        // TODO: DEBUG
-        $imageFiles = $imageFilesFiltered;
-        echo '<br />COUNT: ' . count($imageFiles) . '<br />';
-        print_r($imageFiles);
         
         // Parse info
         $images = array();

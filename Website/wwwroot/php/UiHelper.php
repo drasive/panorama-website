@@ -30,23 +30,60 @@ class UiHelper  {
     public static function GetTimeDifferenceString($timestamp1, $timestamp2) {
         $difference = abs($timestamp1 - $timestamp2);
         
+        $result = null;
         if ($difference < 60) {
-            return round($difference / 60, 0) . ' seconds';
+            $result = $difference;
+            if ($result != 1) {
+                return $result . ' seconds';
+            }
+            else {
+                return $result . ' second';
+            }
         }
         else if ($difference < 60 * 60) {
-            return round($difference / 60, 0) . ' minutes';
+            $result = round($difference / 60, 0);
+            if ($result != 1) {
+                return $result . ' minutes';
+            }
+            else {
+                return $result . ' minute';
+            }
         }
         else if ($difference < 60 * 60 * 24) {
-            return round($difference / 60 / 60, 0) . ' hours';
+            $result = round($difference / 60 / 60, 0);
+            if ($result != 1) {
+                return $result . ' hours';
+            }
+            else {
+                return $result . ' hour';
+            }
         }
         else if ($difference < 60 * 60 * 24 * 31) {
-            return round($difference / 60 / 60 / 24, 0) . ' days';
+            $result = round($difference / 60 / 60 / 24, 0);
+            if ($result != 1) {
+                return $result . ' days';
+            }
+            else {
+                return $result . ' day';
+            }
         }
         else if ($difference < 60 * 60 * 24 * 365) {
-            return round($difference / 60 / 60 / 24 / 30, 0) . ' months';
+            $result = round($difference / 60 / 60 / 24 / 30, 0);
+            if ($result != 1) {
+                return $result . ' months';
+            }
+            else {
+                return $result . ' month';
+            }
         }
         else {
-            return round($difference / 60 / 60 / 24 / 365, 1) . ' years';
+            $result = round($difference / 60 / 60 / 24 / 365, 1);
+            if ($result != 1) {
+                return $result . ' years';
+            }
+            else {
+                return $result . ' year';
+            }
         }
     }
     

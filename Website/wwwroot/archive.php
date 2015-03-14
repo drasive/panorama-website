@@ -44,7 +44,7 @@
     $archiveDuration = ConfigurationReader::getArchiveDuration();
     
     $maximumDate = strtotime(date('Y-m-d'));    
-    $minimumDate = $maximumDate - ((60 * 60 * 24 * $archiveDuration) - 1);    
+    $minimumDate = $maximumDate - ((60 * 60 * 24 * $archiveDuration) - 1);
     if ($date == null || $date == false || $date == '' ||
         $date < $minimumDate || $date > $maximumDate) {
         // Date couldn't be obtained or is invalid
@@ -52,14 +52,14 @@
         $date = $defaultDate;
         
         if (ConfigurationReader::getDebugMode() == true) {
-            echo 'Debug: "date" HTTP parameter not existing or invalid, ' . 
+            echo '[DEBUG] "date" HTTP parameter not existing or invalid, ' . 
             'using the default value "' . date('Y-m-d', $defaultDate) . '"' . 
             '<br />' . PHP_EOL;
         }
     }
     
     if (ConfigurationReader::getDebugMode() == true) {
-        echo 'Debug: "date" parameter = "' . date('Y-m-d', $date) . '"' .
+        echo '[DEBUG] "date" parameter = "' . date('Y-m-d', $date) . '"' .
         '<br />' . PHP_EOL;
     }
     ?>
@@ -86,7 +86,7 @@
                 <?php
                 require_once("php/ImageReader.php");
                 
-                $images = ImageReader::GetImages($date);
+                $images = ImageReader::GetArchiveImages($date);
                 if (!is_null($images) && count($images) > 0) {
                     echo '<div id="gallery" class="gallery">';
                     
