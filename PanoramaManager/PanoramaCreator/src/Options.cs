@@ -8,19 +8,20 @@ namespace DimitriVranken.PanoramaCreator
 {
     class Options
     {
-        [Option('a', "ip-address", Required = true, HelpText = "The ip address of the camera.")]
+        [Option('c', "ip-address", Required = true, HelpText = "The ip address of the camera.")]
         public string IpAddress { get; set; }
         public IPAddress IpAddressParsed { get; set; }
 
-        [Option('o', "output", Required = true, HelpText = "The file to output the panoramic image to.")]
-        public string Output { get; set; }
-        public FileInfo OutputParsed { get; set; }
-
-        [Option('f', "force", DefaultValue = false, HelpText = "Accept any possible confirmations automatically. Use with care.")]
-        public bool Force { get; set; }
-
-        [Option('c', "image-count", DefaultValue = 8, HelpText = "The number of images to generate the panoramic image from.")]
+        // TODO: (Networking) Update updated default value
+        [Option('i', "image-count", DefaultValue = 8, HelpText = "The number of images to generate the panoramic image from.")]
         public int ImageCount { get; set; }
+
+        [Option('o', "output", Required = true, HelpText = "The folder to output the panoramic image to.")]
+        public string Output { get; set; }
+        public DirectoryInfo OutputParsed { get; set; }
+
+        [Option('a', "archive", DefaultValue = false, HelpText = "Save the panoramic image into an archive subfolder too.")]
+        public bool Archive { get; set; }
 
 
         [Option("proxy-address", HelpText = "The address of the proxy server to use.")]
@@ -36,6 +37,9 @@ namespace DimitriVranken.PanoramaCreator
 
         [Option('v', "verbose", DefaultValue = false, HelpText = "Print verbose details during execution.")]
         public bool Verbose { get; set; }
+
+        [Option('f', "force", DefaultValue = false, HelpText = "Accept any possible confirmations automatically. Use with care.")]
+        public bool Force { get; set; }
 
         [Option("no-network", DefaultValue = false, HelpText = "Do not use any network resources like the camera.")]
         public bool NoNetwork { get; set; }

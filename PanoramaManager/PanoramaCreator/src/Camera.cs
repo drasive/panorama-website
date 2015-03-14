@@ -41,6 +41,15 @@ namespace DimitriVranken.PanoramaCreator
 
         private HttpWebResponse ExecuteCommand(string commandUrl, int waitTime)
         {
+            if (string.IsNullOrEmpty(commandUrl))
+            {
+                throw new ArgumentNullException("commandUrl");
+            }
+            if (waitTime < 0)
+            {
+                throw new ArgumentOutOfRangeException("waitTime");
+            }
+
             if (NoNetwork)
             {
                 return null;
@@ -63,8 +72,17 @@ namespace DimitriVranken.PanoramaCreator
             return response;
         }
 
-        private bool ExecuteCommand(string commandUrl, string destinationFile)
+        private bool ExecuteCommand(string commandUrl, FileInfo destinationFile)
         {
+            if (string.IsNullOrEmpty(commandUrl))
+            {
+                throw new ArgumentNullException("commandUrl");
+            }
+            if (destinationFile == null)
+            {
+                throw new ArgumentNullException("destinationFile");
+            }
+
             if (NoNetwork)
             {
                 return true;
@@ -79,7 +97,7 @@ namespace DimitriVranken.PanoramaCreator
                 {
                     // Download the response to a file
                     using (var inputStream = response.GetResponseStream())
-                    using (var outputStream = File.OpenWrite(destinationFile))
+                    using (var outputStream = File.OpenWrite(destinationFile.FullName))
                     {
                         var buffer = new byte[4096];
                         int bytesRead;
@@ -103,9 +121,9 @@ namespace DimitriVranken.PanoramaCreator
         }
 
 
-        public void TakeImage(string destinationFile)
+        public void TakeImage(FileInfo destinationFile)
         {
-            if (string.IsNullOrEmpty(destinationFile))
+            if (destinationFile == null)
             {
                 throw new ArgumentNullException("destinationFile");
             }

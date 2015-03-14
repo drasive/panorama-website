@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: _Change -o parameter to folder, use for example images
-        // TODO: Make max. image and pan resolution for processing configurable
-        // TODO: (Network) _Check rights to access camera
-        // TODO: (Network) Set image quality etc. (p. 57 manual, check default values)
-
-        // TODO: Manual: Camera may not be same settings/ position after script was run (with details?)
-
         public static readonly Options Options = new Options();
         static Camera _camera;
 
@@ -39,15 +35,16 @@ namespace DimitriVranken.PanoramaCreator
 
             // Log raw options
             Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
-            Logger.UserInterface.Debug("output: {0}", Options.Output);
-            Logger.UserInterface.Debug("force: {0}", Options.Force);
             Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
+            Logger.UserInterface.Debug("output: {0}", Options.Output);
+            Logger.UserInterface.Debug("archive: {0}", Options.Archive);
 
             Logger.UserInterface.Debug("proxy-address: {0}", Options.ProxyAddress);
             Logger.UserInterface.Debug("proxy-username: {0}", Options.ProxyUsername);
             Logger.UserInterface.Debug("proxy-password: {0}", Options.ProxyPassword);
 
             Logger.UserInterface.Debug("verbose: {0}", Options.Verbose);
+            Logger.UserInterface.Debug("force: {0}", Options.Force);
             Logger.UserInterface.Debug("no-network: {0}", Options.NoNetwork);
 
 
@@ -66,8 +63,42 @@ namespace DimitriVranken.PanoramaCreator
                 Logger.UserInterface.Error("Error: The specified ip-address is invalid");
             }
 
+            // ---image-count
+            int minimumImageCount = 2;
+            // Enough to cover a 360° view when the angle changes at least 15° per picture
+            var maximumImageCount = (int)Math.Ceiling(360d / 15);
+            if (Options.ImageCount < minimumImageCount)
+            {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The image-count may not be lower than {0}", minimumImageCount);
+            }
+            else if (Options.ImageCount > maximumImageCount)
+            {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
+            }
+
             // ---output
-            Options.OutputParsed = new FileInfo(Options.Output);
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(Path.GetExtension(Options.Output)))
+                {
+                    // Specified output is a file
+                    optionInvalid = true;
+                    Logger.UserInterface.Error("Error: The specified output is not a valid directory");
+                }
+                else
+                {
+                    Options.OutputParsed = new DirectoryInfo(Options.Output);
+                }
+            }
+            catch
+            {
+                optionInvalid = true;
+                Logger.UserInterface.Error("Error: The specified output is not a valid directory");
+            }
+
+            // ---archive doesn't need to be parsed
 
             // ---proxy-address
             if (!string.IsNullOrEmpty(Options.ProxyAddress))
@@ -107,21 +138,9 @@ namespace DimitriVranken.PanoramaCreator
                 Logger.UserInterface.Error("Error: proxy-password needs to be set too when using proxy-address");
             }
 
-            // ---image-count
-            const int minimumImageCount = 2;
-            const int maximumImageCount = 25;
-            if (Options.ImageCount < minimumImageCount)
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The image-count may not be lower than {0}", minimumImageCount);
-            }
-            else if (Options.ImageCount > maximumImageCount)
-            {
-                optionInvalid = true;
-                Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
-            }
-
             // ---verbose doesn't need to be parsed
+
+            // ---force doesn't need to be parsed
 
             // ---no-network doesn't need to be parsed
 
@@ -129,31 +148,29 @@ namespace DimitriVranken.PanoramaCreator
             return !optionInvalid;
         }
 
-        private static void SetupCamera()
+        private static void SetupCamera(IPAddress ipAddress, Uri proxyAddress, string proxyUsername, string proxyPassword, bool noNetwork)
         {
             if (_camera != null)
             {
                 return;
             }
 
-            if (Options.ProxyAddressParsed == null)
+            if (proxyAddress == null)
             {
-                _camera = new Camera(Options.IpAddressParsed, Options.NoNetwork);
+                _camera = new Camera(ipAddress, noNetwork);
             }
             else
             {
-                var proxy = new WebProxy(Options.ProxyAddressParsed, true);
-                proxy.Credentials = new NetworkCredential(Options.ProxyUsername, Options.ProxyPassword);
+                var proxy = new WebProxy(proxyAddress, true);
+                proxy.Credentials = new NetworkCredential(proxyUsername, proxyPassword);
 
-                _camera = new Camera(Options.IpAddressParsed, proxy, Options.NoNetwork);
+                _camera = new Camera(ipAddress, proxy, noNetwork);
             }
         }
 
-        private static List<string> TakeImages()
+        private static IList<FileInfo> TakeImages(int imageCount)
         {
             Console.WriteLine();
-
-            SetupCamera();
 
             // Move into starting position
             // TODO: (Networking) Test if increased pan speed saves time when turning to starting position
@@ -162,52 +179,85 @@ namespace DimitriVranken.PanoramaCreator
             // TODO: (Networking) Test out other pan speed values and the panoramic image quality
             _camera.SetPanSpeed(-3);
 
-            var stepsToTheLeft = Math.Floor((decimal)Options.ImageCount / 2);
-            for (var stepsExecuted = 0; stepsExecuted < stepsToTheLeft; stepsExecuted++)
+            var imagesTakenToTheLeft = Math.Floor(imageCount / 2d); // Equal or one less than images taken to the right
+            for (var stepsExecuted = 0; stepsExecuted < imagesTakenToTheLeft; stepsExecuted++)
             {
                 _camera.Rotate(CameraDirection.Left);
             }
 
             // Take images
-            var imageFiles = new List<string>();
+            var imageFiles = new List<FileInfo>();
             // TODO: (Networking) Test out amount of images required for 180 degrees
-            for (var imageIndex = 1; imageIndex <= Options.ImageCount; imageIndex++)
+            for (var imageIndex = 1; imageIndex <= imageCount; imageIndex++)
             {
                 // Take image
-                var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                var imageFile = Path.Combine(Common.GetTemporaryFolder(), String.Format("Snapshot {0} ({1}).jpg", imageTimestamp, Guid.NewGuid()));
+                var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                var imagePath = Path.Combine(Common.GetTemporaryFolder(), String.Format("Snapshot_{0}_({1}).jpg", imageTimestamp, Guid.NewGuid()));
+                var imageFile = new FileInfo(imagePath);
                 imageFiles.Add(imageFile);
 
-                Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, Options.ImageCount);
+                Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, imageCount);
                 _camera.TakeImage(imageFile);
 
                 // Rotate camera (not after the last image was taken)
-                if (imageIndex < Options.ImageCount)
+                if (imageIndex < imageCount)
                 {
                     _camera.Rotate(CameraDirection.Right);
-                }
-            }
-
-            if (Options.NoNetwork)
-            {
-                // Use example images
-                imageFiles.Clear();
-
-                for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
-                {
-                    imageFiles.Add(String.Format(@"C:\temp\img{0}.jpg", imageFileIndex));
                 }
             }
 
             return imageFiles;
         }
 
-        private static void GeneratePanoramicImage(IEnumerable<string> imageFiles)
+        private static void SavePanoramicImage(Bitmap image, DirectoryInfo outputDirectory)
+        {
+            Common.CheckDirectory(outputDirectory);
+
+            // TODO: Use format from config
+            var fileName = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".png";
+            var outputFile = Path.Combine(outputDirectory.FullName, fileName);
+
+            // Check if file already exists
+            if (File.Exists(outputFile) && !Common.AskForUserConfirmation(
+                    String.Format("The file '{0}' already exists. Do you want to override it?", outputFile),
+                    true))
+            {
+                return;
+            }
+
+            // Save image
+            Logger.Default.Info("PanoramicGenerator: Saving the panoramic image to '{0}'", outputFile);
+            image.Save(outputFile, ImageFormat.Png);
+        }
+
+        private static void GenerateAndSavePanoramicImage(IEnumerable<FileInfo> imageFiles, DirectoryInfo outputDirectory, bool archive)
         {
             Console.WriteLine();
 
-            Common.CheckDirectory(Options.OutputParsed.Directory.FullName);
-            PanoramicImageGenerator.GeneratePanoramicImage(imageFiles, Options.OutputParsed.FullName);
+            Bitmap image = null;
+            try
+            {
+                // Generate image
+                image = PanoramicImageGenerator.GeneratePanoramicImage(imageFiles);
+
+                // Save image
+                SavePanoramicImage(image, outputDirectory);
+
+                if (Options.Archive)
+                {
+                    // TODO: Use format from config
+                    var archiveSubdirectoryName = DateTime.Now.ToString("yyyy-MM-dd");
+                    var archiveSubdirectory = new DirectoryInfo(Path.Combine(outputDirectory.FullName, archiveSubdirectoryName));
+                    SavePanoramicImage(image, archiveSubdirectory);
+                }
+            }
+            finally
+            {
+                if (image != null)
+                {
+                    image.Dispose();
+                }
+            }
         }
 
 
@@ -224,6 +274,9 @@ namespace DimitriVranken.PanoramaCreator
                 // Parse parameters
                 if (!ParseOptions(args))
                 {
+#if DEBUG
+                    Console.ReadLine();
+#endif
                     Environment.Exit(1);
                 }
 
@@ -231,13 +284,28 @@ namespace DimitriVranken.PanoramaCreator
                 Console.WriteLine("Camera IP address: {0}", Options.IpAddressParsed);
 
                 // Capture images
-                var imageFiles = TakeImages();
+                SetupCamera(Options.IpAddressParsed,
+                    Options.ProxyAddressParsed, Options.ProxyUsername, Options.ProxyPassword,
+                    Options.NoNetwork);
+                var imageFiles = TakeImages(Options.ImageCount);
 
-                // Generate panoramic image
-                GeneratePanoramicImage(imageFiles);
+                if (Options.NoNetwork)
+                {
+                    // Use example images
+                    imageFiles.Clear();
+
+                    for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
+                    {
+                        imageFiles.Add(new FileInfo(String.Format(@"C:\temp\img{0}.jpg", imageFileIndex)));
+                    }
+                }
+
+                // Generate and save panoramic image
+                GenerateAndSavePanoramicImage(imageFiles, Options.OutputParsed, Options.Archive);
 
                 // Delete temporary files
-                if (!Options.NoNetwork){
+                if (!Options.NoNetwork)
+                {
                     Logger.UserInterface.Debug("Deleting temporary files");
 
                     foreach (var imageFile in imageFiles)

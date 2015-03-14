@@ -19,6 +19,11 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
+        public static void CheckDirectory(DirectoryInfo directory)
+        {
+            CheckDirectory(directory.FullName);
+        }
+
         public static void TryDeleteFile(string filePath)
         {
             if (File.Exists(filePath))
@@ -38,6 +43,11 @@ namespace DimitriVranken.PanoramaCreator
             {
                 Logger.Default.Trace("File {0} doesn't exists and is not deleted", filePath);
             }
+        }
+
+        public static void TryDeleteFile(FileInfo file)
+        {
+            TryDeleteFile(file.FullName);
         }
 
         public static string GetTemporaryFolder()
@@ -60,7 +70,7 @@ namespace DimitriVranken.PanoramaCreator
             {
                 options = "[y/n]";
             }
-            else if (defaultOption.Value == true)
+            else if (defaultOption.Value)
             {
                 options = "[Y/n]";
             }
