@@ -4,13 +4,14 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
+        // TODO: Refactor
+
         public static readonly Options Options = new Options();
         static Camera _camera;
 
@@ -38,6 +39,7 @@ namespace DimitriVranken.PanoramaCreator
             Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
             Logger.UserInterface.Debug("output: {0}", Options.Output);
             Logger.UserInterface.Debug("archive: {0}", Options.Archive);
+            Logger.UserInterface.Debug("thumbnail: {0}", Options.Thumbnail);
 
             Logger.UserInterface.Debug("proxy-address: {0}", Options.ProxyAddress);
             Logger.UserInterface.Debug("proxy-username: {0}", Options.ProxyUsername);
@@ -46,6 +48,7 @@ namespace DimitriVranken.PanoramaCreator
             Logger.UserInterface.Debug("verbose: {0}", Options.Verbose);
             Logger.UserInterface.Debug("force: {0}", Options.Force);
             Logger.UserInterface.Debug("no-network: {0}", Options.NoNetwork);
+            Logger.UserInterface.Debug("no-merge: {0}", Options.NoMerge);
 
 
             // Validate options
@@ -100,6 +103,8 @@ namespace DimitriVranken.PanoramaCreator
 
             // ---archive doesn't need to be parsed
 
+            // ---thumbnail doesn't need to be parsed
+
             // ---proxy-address
             if (!string.IsNullOrEmpty(Options.ProxyAddress))
             {
@@ -119,23 +124,27 @@ namespace DimitriVranken.PanoramaCreator
             // ---proxy-username
             if (Options.ProxyUsername != null && Options.ProxyAddressParsed == null)
             {
-                Logger.UserInterface.Warn("Warning: The specified proxy-username is ignored because no proxy-address is set");
+                Logger.UserInterface.Warn("Warning: The specified proxy-username is ignored because " +
+                                          "no proxy-address is set");
             }
             else if (Options.ProxyUsername == null && Options.ProxyAddress != null)
             {
                 optionInvalid = true;
-                Logger.UserInterface.Error("Error: proxy-username needs to be set too when using proxy-address");
+                Logger.UserInterface.Error("Error: proxy-username needs to be set too " +
+                                           "when using proxy-address");
             }
 
             // ---proxy-password
             if (Options.ProxyPassword != null && Options.ProxyAddress == null)
             {
-                Logger.UserInterface.Warn("Warning: The specified proxy-password is ignored because no proxy-address is set");
+                Logger.UserInterface.Warn("Warning: The specified proxy-password is ignored because " +
+                                          "no proxy-address is set");
             }
             else if (Options.ProxyPassword == null && Options.ProxyAddress != null)
             {
                 optionInvalid = true;
-                Logger.UserInterface.Error("Error: proxy-password needs to be set too when using proxy-address");
+                Logger.UserInterface.Error("Error: proxy-password needs to be set too " +
+                                           "when using proxy-address");
             }
 
             // ---verbose doesn't need to be parsed
@@ -148,7 +157,9 @@ namespace DimitriVranken.PanoramaCreator
             return !optionInvalid;
         }
 
-        private static void SetupCamera(IPAddress ipAddress, Uri proxyAddress, string proxyUsername, string proxyPassword, bool noNetwork)
+        private static void SetupCamera(IPAddress ipAddress,
+            Uri proxyAddress, string proxyUsername, string proxyPassword,
+            bool noNetwork)
         {
             if (_camera != null)
             {
@@ -192,7 +203,9 @@ namespace DimitriVranken.PanoramaCreator
             {
                 // Take image
                 var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                var imagePath = Path.Combine(Common.GetTemporaryFolder(), String.Format("Snapshot_{0}_({1}).jpg", imageTimestamp, Guid.NewGuid()));
+                var imagePath = Path.Combine(
+                    Common.GetTemporaryFolder(),
+                    String.Format("Snapshot_{0}_({1}).jpg", imageTimestamp, Guid.NewGuid()));
                 var imageFile = new FileInfo(imagePath);
                 imageFiles.Add(imageFile);
 
@@ -209,50 +222,78 @@ namespace DimitriVranken.PanoramaCreator
             return imageFiles;
         }
 
-        private static void SavePanoramicImage(Bitmap image, DirectoryInfo outputDirectory)
+        private static void SavePanoramicImage(DirectoryInfo outputDirectory, Image image, Image thumbnail = null)
         {
             Common.CheckDirectory(outputDirectory);
 
             // TODO: Use format from config
-            var fileName = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".png";
-            var outputFile = Path.Combine(outputDirectory.FullName, fileName);
+            var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            var imageName = imageTimestamp + ".png";
+            var imageFile = Path.Combine(outputDirectory.FullName, imageName);
 
-            // Check if file already exists
-            if (File.Exists(outputFile) && !Common.AskForUserConfirmation(
-                    String.Format("The file '{0}' already exists. Do you want to override it?", outputFile),
+            // Check if image file already exists
+            if (File.Exists(imageFile) && !Common.AskForUserConfirmation(
+                    String.Format("The file '{0}' already exists. Do you want to override it?", imageFile),
                     true))
             {
                 return;
             }
 
             // Save image
-            Logger.Default.Info("PanoramicGenerator: Saving the panoramic image to '{0}'", outputFile);
-            image.Save(outputFile, ImageFormat.Png);
+            Logger.UserInterface.Info("Saving the image to '{0}'", imageFile);
+            image.Save(imageFile, ImageFormat.Png);
+
+            // Save thumbnail
+            if (thumbnail != null)
+            {
+                // TODO: Use format from config
+                var thumbnailName = imageTimestamp + "_thumb.png";
+                var thumbnailFile = Path.Combine(outputDirectory.FullName, thumbnailName);
+
+                // Take the risk of overriding an existing file (the user already gave his OK to override the image)
+
+                Logger.UserInterface.Info("Saving the image thumbnail to '{0}'", thumbnailFile);
+                thumbnail.Save(thumbnailFile, ImageFormat.Png);
+            }
         }
 
-        private static void GenerateAndSavePanoramicImage(IEnumerable<FileInfo> imageFiles, DirectoryInfo outputDirectory, bool archive)
+        private static void GenerateAndSavePanoramicImage(IEnumerable<FileInfo> imageFiles, DirectoryInfo outputDirectory,
+            bool saveToArchive, bool saveThumbnail)
         {
-            Console.WriteLine();
-
             Bitmap image = null;
+            Bitmap thumbnail = null;
             try
             {
                 // Generate image
+                Console.WriteLine();
+
                 image = PanoramicImageGenerator.GeneratePanoramicImage(imageFiles);
+                if (saveThumbnail)
+                {
+                    thumbnail = PanoramicImageGenerator.GenerateThumbnail(image);
+                }
 
                 // Save image
-                SavePanoramicImage(image, outputDirectory);
+                Console.WriteLine();
 
-                if (Options.Archive)
+                SavePanoramicImage(outputDirectory, image, thumbnail);
+                if (saveToArchive)
                 {
                     // TODO: Use format from config
                     var archiveSubdirectoryName = DateTime.Now.ToString("yyyy-MM-dd");
-                    var archiveSubdirectory = new DirectoryInfo(Path.Combine(outputDirectory.FullName, archiveSubdirectoryName));
-                    SavePanoramicImage(image, archiveSubdirectory);
+                    var archiveSubdirectory = new DirectoryInfo(Path.Combine(
+                        outputDirectory.FullName,
+                        archiveSubdirectoryName));
+                    SavePanoramicImage(archiveSubdirectory, image, thumbnail);
                 }
             }
             finally
             {
+                if (thumbnail != null)
+                {
+                    thumbnail.Dispose();
+                }
+
                 if (image != null)
                 {
                     image.Dispose();
@@ -291,17 +332,19 @@ namespace DimitriVranken.PanoramaCreator
 
                 if (Options.NoNetwork)
                 {
-                    // Use example images
+                    // Use example images for merging
                     imageFiles.Clear();
 
                     for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
                     {
-                        imageFiles.Add(new FileInfo(String.Format(@"C:\temp\img{0}.jpg", imageFileIndex)));
+                        var imageName = String.Format("Snapshot {0}.jpg", imageFileIndex);
+                        var imageFile = new FileInfo(Path.Combine(Options.OutputParsed.FullName, imageName));
+                        imageFiles.Add(imageFile);
                     }
                 }
 
                 // Generate and save panoramic image
-                GenerateAndSavePanoramicImage(imageFiles, Options.OutputParsed, Options.Archive);
+                GenerateAndSavePanoramicImage(imageFiles, Options.OutputParsed, Options.Archive, Options.Thumbnail);
 
                 // Delete temporary files
                 if (!Options.NoNetwork)
@@ -315,6 +358,8 @@ namespace DimitriVranken.PanoramaCreator
                 }
 
                 // Print done
+                Console.WriteLine();
+
                 stopwatch.Stop();
                 var executionTime = Math.Round((decimal)stopwatch.ElapsedMilliseconds / 1000, 2);
                 Logger.UserInterface.Info("Done ({0} seconds)", executionTime);

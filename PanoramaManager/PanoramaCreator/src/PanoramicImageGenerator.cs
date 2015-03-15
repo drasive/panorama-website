@@ -11,6 +11,8 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramicImageGenerator
     {
+        // TODO: Refactor
+
         private static Bitmap ChangeImageResolution(Image image, decimal scalingFactor)
         {
             return new Bitmap(image, (int)(image.Width * scalingFactor), (int)(image.Height * scalingFactor));
@@ -88,7 +90,8 @@ namespace DimitriVranken.PanoramaCreator
                     if (!imageFile.Exists)
                     {
 #if DEBUG
-                        Logger.UserInterface.Warn("Warning: The snapshot {0} doesn't exist and won't be merged into the panoramic image", imageFile);
+                        Logger.UserInterface.Warn("Warning: The snapshot {0} doesn't exist and " +
+                                                  "can't be merged into the panoramic image", imageFile);
                         continue;
 #else
                         throw new FileNotFoundException(String.Format(
@@ -99,6 +102,12 @@ namespace DimitriVranken.PanoramaCreator
 
                     imagesRaw.Add(new Bitmap(imageFile.FullName));
                 }
+
+                // TODO: Warn or exception?
+                //if (!imagesRaw.Any())
+                //{
+                //    throw new Exception("There are no snapshots to be merged.");
+                //}
 
                 // Process raw bitmaps
                 Logger.Default.Debug("PanoramicGenerator: Processing bitmaps");
@@ -146,6 +155,12 @@ namespace DimitriVranken.PanoramaCreator
                     }
                 }
             }
+        }
+
+        public static Bitmap GenerateThumbnail(Bitmap image)
+        {
+            // TODO: Use resolution from config
+            return ReduceImageResolution(image, 720);
         }
     }
 }
