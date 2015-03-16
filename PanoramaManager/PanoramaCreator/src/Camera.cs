@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Net;
 
@@ -18,10 +17,8 @@ namespace DimitriVranken.PanoramaCreator
 
         public WebProxy Proxy { get; private set; }
 
-        public bool NoNetwork { get; private set; }
 
-
-        public Camera(IPAddress ipAddress, bool noNetwork = false)
+        public Camera(IPAddress ipAddress)
         {
             if (ipAddress == null)
             {
@@ -29,11 +26,10 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             IpAddress = ipAddress;
-            NoNetwork = noNetwork;
         }
 
-        public Camera(IPAddress ipAddress, WebProxy proxy, bool noNetwork = false)
-            : this(ipAddress, noNetwork)
+        public Camera(IPAddress ipAddress, WebProxy proxy)
+            : this(ipAddress)
         {
             Proxy = proxy;
         }
@@ -45,32 +41,40 @@ namespace DimitriVranken.PanoramaCreator
             {
                 throw new ArgumentNullException("commandUrl");
             }
-            if (waitTime < 0)
+            if (waitTime < 0 || waitTime > 1000*60*5)
             {
                 throw new ArgumentOutOfRangeException("waitTime");
-            }
-
-            if (NoNetwork)
-            {
-                return null;
             }
 
             var requestUrl = UrlProtocol + IpAddress + UrlCommandFolder + commandUrl;
 
             Logger.Default.Trace("Camera: Executing request '{0}'", requestUrl);
             var request = WebRequest.Create(requestUrl);
-            request.Timeout = 20 * 1000;
+            request.Timeout = 20*1000;
             if (Proxy != null)
             {
                 request.Proxy = Proxy;
             }
 
-            var response = (HttpWebResponse)request.GetResponse();
-            Logger.Default.Trace("Camera: Response received (HTTP {0})", response.StatusCode);
+            try
+            {
 
-            System.Threading.Thread.Sleep(waitTime);
-            return response;
-        }
+                var response = (HttpWebResponse) request.GetResponse();
+                Logger.Default.Trace("Camera: Response received (HTTP {0})", response.StatusCode);
+
+                System.Threading.Thread.Sleep(waitTime);
+                return response;
+            }
+            catch (WebException exception)
+            {
+                if (exception.Status == WebExceptionStatus.ConnectFailure)
+                {
+                    throw new Exception("Unable to connect to the network camera.", exception);
+                }
+
+                throw;
+            }
+    }
 
         private bool ExecuteCommand(string commandUrl, FileInfo destinationFile)
         {
@@ -81,11 +85,6 @@ namespace DimitriVranken.PanoramaCreator
             if (destinationFile == null)
             {
                 throw new ArgumentNullException("destinationFile");
-            }
-
-            if (NoNetwork)
-            {
-                return true;
             }
 
             using (var response = ExecuteCommand(commandUrl, 3 * 1000))
@@ -173,20 +172,17 @@ namespace DimitriVranken.PanoramaCreator
             // Execute command
             Logger.UserInterface.Debug("Rotating the camera {0}", direction.ToString().ToLower());
 
-            using (ExecuteCommand(commandUrl, waitTime)) {
+            using (ExecuteCommand(commandUrl, waitTime))
+            {
                 // using-block makes sure the return value gets disposed properly in all cases
             }
         }
 
         public void SetPanSpeed(int speed)
         {
-            if (speed < -5)
+            if (speed < -5 || speed > 5)
             {
-                throw new ArgumentOutOfRangeException(speed.ToString(CultureInfo.InvariantCulture));
-            }
-            if (speed > 5)
-            {
-                throw new ArgumentOutOfRangeException(speed.ToString(CultureInfo.InvariantCulture));
+                throw new ArgumentOutOfRangeException("speed");
             }
 
             // Build command URL
@@ -200,6 +196,5 @@ namespace DimitriVranken.PanoramaCreator
                 // using-block makes sure the return value gets disposed properly in all cases
             }
         }
-
     }
 }

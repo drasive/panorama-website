@@ -19,7 +19,7 @@ namespace DimitriVranken.PanoramaCreator
         public int ImageCount { get; set; }
 
         [Option('o', "output", Required = true,
-            HelpText = "The folder to output the panoramic image to.")]
+            HelpText = "The folder to save the panoramic image to.")]
         public string Output { get; set; }
         public DirectoryInfo OutputParsed { get; set; }
 
@@ -51,14 +51,12 @@ namespace DimitriVranken.PanoramaCreator
             HelpText = "Accept any possible confirmations automatically. Use with care.")]
         public bool Force { get; set; }
 
-        // TODO: Skip method calls at a higher level?
-        [Option("no-network", DefaultValue = false,
-            HelpText = "Do not use any network resources like the camera.")]
-        public bool NoNetwork { get; set; }
+        [Option("no-camera", DefaultValue = false,
+            HelpText = "Do not use the network camera to create images. Mainly used for debugging.")]
+        public bool NoCamera { get; set; }
 
-        // TODO: Implement no-merge
         [Option("no-merge", DefaultValue = false,
-            HelpText = "Do not merge the created snapshots into a panoramic image.")]
+            HelpText = "Do not merge the recorded images into a panoramic image.")]
         public bool NoMerge { get; set; }
 
 

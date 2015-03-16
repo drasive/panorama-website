@@ -10,8 +10,6 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramaCreator
     {
-        // TODO: Refactor
-
         public static readonly Options Options = new Options();
         static Camera _camera;
 
@@ -29,12 +27,13 @@ namespace DimitriVranken.PanoramaCreator
             // Parse options
             CommandLine.Parser.Default.ParseArgumentsStrict(options, Options);
 
+            // Log raw options
             if (Options.Verbose)
             {
                 Logger.UserInterface.UpdateLogLevel(NLog.LogLevel.Debug);
+                Console.WriteLine("Raw options:");
             }
 
-            // Log raw options
             Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
             Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
             Logger.UserInterface.Debug("output: {0}", Options.Output);
@@ -47,9 +46,13 @@ namespace DimitriVranken.PanoramaCreator
 
             Logger.UserInterface.Debug("verbose: {0}", Options.Verbose);
             Logger.UserInterface.Debug("force: {0}", Options.Force);
-            Logger.UserInterface.Debug("no-network: {0}", Options.NoNetwork);
+            Logger.UserInterface.Debug("no-camera: {0}", Options.NoCamera);
             Logger.UserInterface.Debug("no-merge: {0}", Options.NoMerge);
 
+            if (Options.Verbose)
+            {
+                Console.WriteLine();
+            }
 
             // Validate options
             var optionInvalid = false;
@@ -151,38 +154,30 @@ namespace DimitriVranken.PanoramaCreator
 
             // ---force doesn't need to be parsed
 
-            // ---no-network doesn't need to be parsed
+            // ---no-camera doesn't need to be parsed
+
+            // ---no-merge doesn't need to be parsed
 
 
             return !optionInvalid;
         }
 
         private static void SetupCamera(IPAddress ipAddress,
-            Uri proxyAddress, string proxyUsername, string proxyPassword,
-            bool noNetwork)
+            Uri proxyAddress, string proxyUsername, string proxyPassword)
         {
             if (_camera != null)
             {
                 return;
             }
 
-            if (proxyAddress == null)
-            {
-                _camera = new Camera(ipAddress, noNetwork);
-            }
-            else
-            {
-                var proxy = new WebProxy(proxyAddress, true);
-                proxy.Credentials = new NetworkCredential(proxyUsername, proxyPassword);
+            var proxy = new WebProxy(proxyAddress, true);
+            proxy.Credentials = new NetworkCredential(proxyUsername, proxyPassword);
 
-                _camera = new Camera(ipAddress, proxy, noNetwork);
-            }
+            _camera = new Camera(ipAddress, proxy);
         }
 
-        private static IList<FileInfo> TakeImages(int imageCount)
+        private static List<FileInfo> TakeImages(int imageCount)
         {
-            Console.WriteLine();
-
             // Move into starting position
             // TODO: (Networking) Test if increased pan speed saves time when turning to starting position
             _camera.Rotate(CameraDirection.Home);
@@ -257,7 +252,7 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
-        private static void GenerateAndSavePanoramicImage(IEnumerable<FileInfo> imageFiles, DirectoryInfo outputDirectory,
+        private static void GenerateAndSavePanoramicImage(IList<FileInfo> imageFiles, DirectoryInfo outputDirectory,
             bool saveToArchive, bool saveThumbnail)
         {
             Bitmap image = null;
@@ -265,12 +260,12 @@ namespace DimitriVranken.PanoramaCreator
             try
             {
                 // Generate image
-                Console.WriteLine();
-
+                // TODO: Use resolution from config
                 image = PanoramicImageGenerator.GeneratePanoramicImage(imageFiles);
                 if (saveThumbnail)
                 {
-                    thumbnail = PanoramicImageGenerator.GenerateThumbnail(image);
+                    // TODO: Use resolution from config
+                    thumbnail = PanoramicImageGenerator.GenerateThumbnail(image, 720);
                 }
 
                 // Save image
@@ -325,29 +320,53 @@ namespace DimitriVranken.PanoramaCreator
                 Console.WriteLine("Camera IP address: {0}", Options.IpAddressParsed);
 
                 // Capture images
-                SetupCamera(Options.IpAddressParsed,
-                    Options.ProxyAddressParsed, Options.ProxyUsername, Options.ProxyPassword,
-                    Options.NoNetwork);
-                var imageFiles = TakeImages(Options.ImageCount);
+                Console.WriteLine();
 
-                if (Options.NoNetwork)
+                var imageFiles = new List<FileInfo>();
+                if (!Options.NoCamera)
                 {
-                    // Use example images for merging
-                    imageFiles.Clear();
+                    SetupCamera(Options.IpAddressParsed,
+                        Options.ProxyAddressParsed, Options.ProxyUsername, Options.ProxyPassword);
+
+                    imageFiles = TakeImages(Options.ImageCount);
+                }
+                else
+                {
+                    // Use example images
+                    Logger.UserInterface.Warn("Not taking any images with the network camera, " +
+                                              "using example images instead (option --no-camera is set)");
 
                     for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
                     {
                         var imageName = String.Format("Snapshot {0}.jpg", imageFileIndex);
                         var imageFile = new FileInfo(Path.Combine(Options.OutputParsed.FullName, imageName));
+
+                        if (!imageFile.Exists)
+                        {
+                            // Assume that there are no more example images
+                            break;
+                        }
+
                         imageFiles.Add(imageFile);
                     }
                 }
 
                 // Generate and save panoramic image
-                GenerateAndSavePanoramicImage(imageFiles, Options.OutputParsed, Options.Archive, Options.Thumbnail);
+                Console.WriteLine();
+
+                if (!Options.NoMerge)
+                {
+                    GenerateAndSavePanoramicImage(imageFiles, Options.OutputParsed, Options.Archive, Options.Thumbnail);
+                }
+                else
+                {
+                    Logger.UserInterface.Warn("Not merging the snapshots into a panoramic image " +
+                                              "(option --no-merge is set)");
+
+                }
 
                 // Delete temporary files
-                if (!Options.NoNetwork)
+                if (!Options.NoCamera)
                 {
                     Logger.UserInterface.Debug("Deleting temporary files");
 

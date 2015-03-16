@@ -11,8 +11,6 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class PanoramicImageGenerator
     {
-        // TODO: Refactor
-
         private static Bitmap ChangeImageResolution(Image image, decimal scalingFactor)
         {
             return new Bitmap(image, (int)(image.Width * scalingFactor), (int)(image.Height * scalingFactor));
@@ -73,13 +71,35 @@ namespace DimitriVranken.PanoramaCreator
         }
 
 
-        public static Bitmap GeneratePanoramicImage(IEnumerable<FileInfo> imageFiles)
+        public static Bitmap GeneratePanoramicImage(IList<FileInfo> imageFiles)
         {
-            // TODO: Take max image resolutions as params
+            if (imageFiles.Count() < 2 || imageFiles.Count() > 100)
+            {
+                throw new ArgumentException("Invalid element count.", "imageFiles");
+            }
+
+            return GeneratePanoramicImage(imageFiles, 1920, 7680);
+        }
+
+        public static Bitmap GeneratePanoramicImage(IList<FileInfo> imageFiles,
+            int maximumProcessingResolution, int maximumOutputResolution)
+        {
+            if (imageFiles.Count() < 2 || imageFiles.Count() > 100)
+            {
+                throw new ArgumentException("Invalid element count.", "imageFiles");
+            }
+            if (maximumProcessingResolution < 144 || maximumProcessingResolution > 7680)
+            {
+                throw new ArgumentOutOfRangeException("maximumProcessingResolution");
+            }
+            if (maximumOutputResolution < 144 || maximumOutputResolution > 7680)
+            {
+                throw new ArgumentOutOfRangeException("maximumOutputResolution");
+            }
+
 
             var imagesRaw = new List<Bitmap>();
             var images = new List<Bitmap>();
-
             try
             {
                 // Load raw bitmaps
@@ -89,31 +109,18 @@ namespace DimitriVranken.PanoramaCreator
                 {
                     if (!imageFile.Exists)
                     {
-#if DEBUG
-                        Logger.UserInterface.Warn("Warning: The snapshot {0} doesn't exist and " +
-                                                  "can't be merged into the panoramic image", imageFile);
-                        continue;
-#else
                         throw new FileNotFoundException(String.Format(
-                                "The snapshot '{0}' doesn't exist and can't be merged into the panoramic image.",
+                                "The snapshot '{0}' doesn't exist.",
                                 imageFile));
-#endif
                     }
 
                     imagesRaw.Add(new Bitmap(imageFile.FullName));
                 }
 
-                // TODO: Warn or exception?
-                //if (!imagesRaw.Any())
-                //{
-                //    throw new Exception("There are no snapshots to be merged.");
-                //}
-
                 // Process raw bitmaps
                 Logger.Default.Debug("PanoramicGenerator: Processing bitmaps");
 
-                const int maximumImageResolution = 1920;
-                images = imagesRaw.Select(imageRaw => ReduceImageResolution(imageRaw, maximumImageResolution)).ToList();
+                images = imagesRaw.Select(imageRaw => ReduceImageResolution(imageRaw, maximumProcessingResolution)).ToList();
                 images = images.Select(image => ConvertImageFormat(image, PixelFormat.Format24bppRgb)).ToList();
 
                 // Merge first two images
@@ -130,10 +137,9 @@ namespace DimitriVranken.PanoramaCreator
                 // Process panoramic image
                 Logger.Default.Debug("PanoramicGenerator: Processing the panoramic image");
 
-                const int maximumPanoramaResolution = 8192;
-                panoramicImage = ReduceImageResolution(panoramicImage, maximumPanoramaResolution);
+                panoramicImage = ReduceImageResolution(panoramicImage, maximumOutputResolution);
 
-
+                // Return
                 return panoramicImage;
             }
             finally
@@ -157,10 +163,14 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
-        public static Bitmap GenerateThumbnail(Bitmap image)
+        public static Bitmap GenerateThumbnail(Bitmap image, int maximumResolution)
         {
-            // TODO: Use resolution from config
-            return ReduceImageResolution(image, 720);
+            if (maximumResolution < 10 || maximumResolution > 7680)
+            {
+                throw new ArgumentOutOfRangeException("maximumResolution");
+            }
+
+            return ReduceImageResolution(image, maximumResolution);
         }
     }
 }
