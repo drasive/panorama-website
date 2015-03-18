@@ -6,13 +6,6 @@ namespace DimitriVranken.PanoramaCreator
 {
     class Camera
     {
-        const string UrlProtocol = "http://";
-        const string UrlCommandFolder = "/cgi-bin/";
-        const string UrlTakeImageCommand = "video.jpg";
-        const string UrlRotationCommand = "camctrl.cgi?move=";
-        const string UrlPanSpeedCommand = "camctrl.cgi?speedpan=";
-
-
         public IPAddress IpAddress { get; private set; }
 
         public WebProxy Proxy { get; private set; }
@@ -41,16 +34,16 @@ namespace DimitriVranken.PanoramaCreator
             {
                 throw new ArgumentNullException("commandUrl");
             }
-            if (waitTime < 0 || waitTime > 1000*60*5)
+            if (waitTime < 0 || waitTime > 1000 * 60 * 5)
             {
                 throw new ArgumentOutOfRangeException("waitTime");
             }
 
-            var requestUrl = UrlProtocol + IpAddress + UrlCommandFolder + commandUrl;
+            var requestUrl = String.Format("http://{0}/cgi-bin/{1}", IpAddress, commandUrl);
 
             Logger.Default.Trace("Camera: Executing request '{0}'", requestUrl);
             var request = WebRequest.Create(requestUrl);
-            request.Timeout = 20*1000;
+            request.Timeout = 20 * 1000;
             if (Proxy != null)
             {
                 request.Proxy = Proxy;
@@ -59,7 +52,7 @@ namespace DimitriVranken.PanoramaCreator
             try
             {
 
-                var response = (HttpWebResponse) request.GetResponse();
+                var response = (HttpWebResponse)request.GetResponse();
                 Logger.Default.Trace("Camera: Response received (HTTP {0})", response.StatusCode);
 
                 System.Threading.Thread.Sleep(waitTime);
@@ -74,7 +67,7 @@ namespace DimitriVranken.PanoramaCreator
 
                 throw;
             }
-    }
+        }
 
         private bool ExecuteCommand(string commandUrl, FileInfo destinationFile)
         {
@@ -87,7 +80,7 @@ namespace DimitriVranken.PanoramaCreator
                 throw new ArgumentNullException("destinationFile");
             }
 
-            using (var response = ExecuteCommand(commandUrl, 3 * 1000))
+            using (var response = ExecuteCommand(commandUrl, 2 * 1000))
             {
                 // Check if the response is valid
                 if (response.StatusCode == HttpStatusCode.OK ||
@@ -129,7 +122,7 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             // Build command URL
-            var commandUrl = UrlTakeImageCommand;
+            const string commandUrl = "video.jpg";
 
             // Execute command
             Logger.UserInterface.Debug("Camera: Taking an image");
@@ -139,48 +132,7 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
-        public void Rotate(CameraDirection direction)
-        {
-            // Build command URL
-            var commandUrl = UrlRotationCommand;
-            switch (direction)
-            {
-                case CameraDirection.Home:
-                    commandUrl += "home";
-                    break;
-                case CameraDirection.Up:
-                    commandUrl += "up";
-                    break;
-                case CameraDirection.Down:
-                    commandUrl += "down";
-                    break;
-                case CameraDirection.Left:
-                    commandUrl += "left";
-                    break;
-                case CameraDirection.Right:
-                    commandUrl += "right";
-                    break;
-                default:
-                    throw new ArgumentException("Unknown enum value encountered.");
-
-            }
-
-            // Set wait time
-            var waitTime = (direction == CameraDirection.Home)
-                ? 6 * 1000
-                : 3 * 1000;
-
-            // Execute command
-            Logger.UserInterface.Debug("Rotating the camera {0}", direction.ToString().ToLower());
-
-            using (ExecuteCommand(commandUrl, waitTime))
-            {
-                // using-block makes sure the return value gets disposed properly in all cases
-            }
-        }
-
-        // TODO: Merge into rotate
-        public void SetPanSpeed(int speed)
+        public void Rotate(CameraDirection direction, int speed = 0)
         {
             if (speed < -5 || speed > 5)
             {
@@ -188,12 +140,40 @@ namespace DimitriVranken.PanoramaCreator
             }
 
             // Build command URL
-            var commandUrl = UrlPanSpeedCommand + speed;
+            var directionString = string.Empty;
+            switch (direction)
+            {
+                case CameraDirection.Home:
+                    directionString += "home";
+                    break;
+                case CameraDirection.Up:
+                    directionString += "up";
+                    break;
+                case CameraDirection.Down:
+                    directionString += "down";
+                    break;
+                case CameraDirection.Left:
+                    directionString += "left";
+                    break;
+                case CameraDirection.Right:
+                    directionString += "right";
+                    break;
+                default:
+                    throw new Exception("Unknown enum value encountered.");
+
+            }
+
+            var commandUrl = String.Format("camctrl.cgi?move={0}&speed={1}", directionString, speed);
+
+            // Set wait time
+            var waitTime = (direction == CameraDirection.Home)
+                ? (int)(4.5 * 1000)
+                : (int)(2.5 * 1000);
 
             // Execute command
-            Logger.UserInterface.Debug("Setting the camera pan speed to {0}", speed);
+            Logger.UserInterface.Debug("Rotating the camera {0} with speed {1}", direction.ToString().ToLower(), speed);
 
-            using (ExecuteCommand(commandUrl, (int)(0.5 * 1000)))
+            using (ExecuteCommand(commandUrl, waitTime))
             {
                 // using-block makes sure the return value gets disposed properly in all cases
             }

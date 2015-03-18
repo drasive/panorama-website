@@ -36,6 +36,7 @@ namespace DimitriVranken.PanoramaCreator
 
             Logger.UserInterface.Debug("ip-address: {0}", Options.IpAddress);
             Logger.UserInterface.Debug("image-count: {0}", Options.ImageCount);
+            Logger.UserInterface.Debug("merge-mode: {0}", Options.MergeMode);
             Logger.UserInterface.Debug("output: {0}", Options.Output);
             Logger.UserInterface.Debug("archive: {0}", Options.Archive);
             Logger.UserInterface.Debug("thumbnail: {0}", Options.Thumbnail);
@@ -72,7 +73,7 @@ namespace DimitriVranken.PanoramaCreator
             // ---image-count
             int minimumImageCount = 2;
             // Enough to cover a 360° view when the angle changes at least 15° per picture
-            var maximumImageCount = (int)Math.Ceiling(360d / 15);
+            var maximumImageCount = (int)Math.Ceiling(360d / 15); // 24
             if (Options.ImageCount < minimumImageCount)
             {
                 optionInvalid = true;
@@ -83,6 +84,8 @@ namespace DimitriVranken.PanoramaCreator
                 optionInvalid = true;
                 Logger.UserInterface.Error("Error: The image-count may not be greater than {0}", maximumImageCount);
             }
+
+            // ---merge-mode doesn't need to be parsed
 
             // ---output
             try
@@ -178,18 +181,18 @@ namespace DimitriVranken.PanoramaCreator
 
         private static List<FileInfo> TakeImages(int imageCount)
         {
+            // TODO: _Adapt to border stitcher
+
             // Move into starting position
             _camera.Rotate(CameraDirection.Home);
 
-            // TODO: (Networking) Test out other pan speed values and image counts to reach 180 degrees
-            // TODO: ~6@1 (shit quality, 65s) ~10@0 (shitter quality, 120s)
-            _camera.SetPanSpeed(2);
-            // TODO: (Camera) Set image quality excellent
+            // TODO: 3@1 for feature stitcher, 3@0,-5,-5 for border stitcher
+            const int panSpeed = 2;
 
             var imagesTakenToTheLeft = Math.Floor(imageCount / 2d); // Equal or one less than images taken to the right
             for (var stepsExecuted = 0; stepsExecuted < imagesTakenToTheLeft; stepsExecuted++)
             {
-                _camera.Rotate(CameraDirection.Left);
+                _camera.Rotate(CameraDirection.Left, panSpeed);
             }
 
             // Take images
@@ -210,7 +213,7 @@ namespace DimitriVranken.PanoramaCreator
                 // Rotate camera (not after the last image was taken)
                 if (imageIndex < imageCount)
                 {
-                    _camera.Rotate(CameraDirection.Right);
+                    _camera.Rotate(CameraDirection.Right, panSpeed);
                 }
             }
 
@@ -252,8 +255,8 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
-        private static void GenerateAndSavePanoramicImage(IList<FileInfo> imageFiles, DirectoryInfo outputDirectory,
-            bool saveToArchive, bool saveThumbnail)
+        private static void GenerateAndSavePanoramicImage(ImageStitcher imageStitcher, IList<FileInfo> imageFiles,
+            DirectoryInfo outputDirectory, bool saveToArchive, bool saveThumbnail)
         {
             Bitmap image = null;
             Bitmap thumbnail = null;
@@ -261,11 +264,11 @@ namespace DimitriVranken.PanoramaCreator
             {
                 // Generate image
                 // TODO: Use resolution from config
-                image = PanoramicImageGenerator.GeneratePanoramicImage(imageFiles);
+                image = imageStitcher.StitchPanoramicImage(imageFiles);
                 if (saveThumbnail)
                 {
                     // TODO: Use resolution from config
-                    thumbnail = PanoramicImageGenerator.GenerateThumbnail(image, 720);
+                    thumbnail = imageStitcher.GenerateThumbnail(image, 480);
                 }
 
                 // Save image
@@ -356,7 +359,21 @@ namespace DimitriVranken.PanoramaCreator
 
                 if (!Options.NoMerge)
                 {
-                    GenerateAndSavePanoramicImage(imageFiles, Options.OutputParsed, Options.Archive, Options.Thumbnail);
+                    ImageStitcher imageStitcher;
+                    switch (Options.MergeMode)
+                    {
+                        case ImageStitcherType.Border:
+                            imageStitcher = new BorderImageStitcher();
+                            break;
+                        case ImageStitcherType.Feature:
+                            imageStitcher = new FeatureImageStitcher();
+                            break;
+                        default:
+                            throw new Exception("Unknown enum value encountered.");
+                    }
+
+                    GenerateAndSavePanoramicImage(imageStitcher, imageFiles,
+                        Options.OutputParsed, Options.Archive, Options.Thumbnail);
                 }
                 else
                 {
