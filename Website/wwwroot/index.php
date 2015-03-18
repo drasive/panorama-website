@@ -21,12 +21,14 @@
     <!-- Scripts -->
     <script src="bower_components/modernizr/modernizr.js"></script>
     <script src="bower_components/respond/dest/respond.min.js"></script>
+
+    <script src="js/no-fouc-start.js"></script>
 </head>
 <body>
     <?php
     require("_browserupgrade.php");
 
-    require_once("php/UiHelper.php");    
+    require_once("php/UiHelper.php");
     UiHelper::SetActivePage('index');
     UiHelper::SetActiveSubpage(null);
 
@@ -40,7 +42,7 @@
             <div class="col-xs-12 text-center">
                 <h1>Live Image</h1>
 
-                <?php                
+                <?php
                 require_once("php/ImageReader.php");
                 
                 $image = ImageReader::GetLastImage();
@@ -88,6 +90,7 @@
     <script src="plugins/elevatezoom/jquery.elevateZoom.min.js"></script>
 
     <script src="js/noscript.js"></script>
+    <script src="js/no-fouc-end.js"></script>
     <script src="js/index.js"></script>
 </body>
 </html>

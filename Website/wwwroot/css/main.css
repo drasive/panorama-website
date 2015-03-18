@@ -8,6 +8,10 @@
     display: none;
 }
 
+.no-fouc {
+    display: none;
+}
+
 .image-fullscreen {
     width: 95%;
 }

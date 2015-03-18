@@ -23,6 +23,8 @@
     <!-- Scripts -->
     <script src="bower_components/modernizr/modernizr.js"></script>
     <script src="bower_components/respond/dest/respond.min.js"></script>
+
+    <script src="js/no-fouc-start.js"></script>
 </head>
 <body>
     <?php
@@ -125,6 +127,7 @@
     <script src="plugins/unitegallery/themes/grid/ug-theme-grid.js"></script>
 
     <script src="js/noscript.js"></script>
+    <script src="js/no-fouc-end.js"></script>
     <script src="js/archive.js"></script>
 </body>
 </html>
