@@ -179,11 +179,12 @@ namespace DimitriVranken.PanoramaCreator
         private static List<FileInfo> TakeImages(int imageCount)
         {
             // Move into starting position
-            // TODO: (Networking) Test if increased pan speed saves time when turning to starting position
             _camera.Rotate(CameraDirection.Home);
 
-            // TODO: (Networking) Test out other pan speed values and the panoramic image quality
-            _camera.SetPanSpeed(-3);
+            // TODO: (Networking) Test out other pan speed values and image counts to reach 180 degrees
+            // TODO: ~6@1 (shit quality, 65s) ~10@0 (shitter quality, 120s)
+            _camera.SetPanSpeed(2);
+            // TODO: (Camera) Set image quality excellent
 
             var imagesTakenToTheLeft = Math.Floor(imageCount / 2d); // Equal or one less than images taken to the right
             for (var stepsExecuted = 0; stepsExecuted < imagesTakenToTheLeft; stepsExecuted++)
@@ -193,7 +194,6 @@ namespace DimitriVranken.PanoramaCreator
 
             // Take images
             var imageFiles = new List<FileInfo>();
-            // TODO: (Networking) Test out amount of images required for 180 degrees
             for (var imageIndex = 1; imageIndex <= imageCount; imageIndex++)
             {
                 // Take image
@@ -365,6 +365,8 @@ namespace DimitriVranken.PanoramaCreator
 
                 }
 
+#if DEBUG
+#else
                 // Delete temporary files
                 if (!Options.NoCamera)
                 {
@@ -375,6 +377,7 @@ namespace DimitriVranken.PanoramaCreator
                         Common.TryDeleteFile(imageFile);
                     }
                 }
+#endif
 
                 // Print done
                 Console.WriteLine();

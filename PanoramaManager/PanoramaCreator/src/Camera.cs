@@ -95,6 +95,7 @@ namespace DimitriVranken.PanoramaCreator
                     response.StatusCode == HttpStatusCode.Redirect)
                 {
                     // Download the response to a file
+                    // TODO: Make sure parent folder exists
                     using (var inputStream = response.GetResponseStream())
                     using (var outputStream = File.OpenWrite(destinationFile.FullName))
                     {
@@ -178,6 +179,7 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
+        // TODO: Merge into rotate
         public void SetPanSpeed(int speed)
         {
             if (speed < -5 || speed > 5)

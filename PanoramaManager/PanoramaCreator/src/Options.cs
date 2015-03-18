@@ -13,7 +13,7 @@ namespace DimitriVranken.PanoramaCreator
         public string IpAddress { get; set; }
         public IPAddress IpAddressParsed { get; set; }
 
-        // TODO: (Networking) Update updated default value
+        // TODO: (Camera) Update updated default value
         [Option('i', "image-count", DefaultValue = 8,
             HelpText = "The number of images to generate the panoramic image from.")]
         public int ImageCount { get; set; }
