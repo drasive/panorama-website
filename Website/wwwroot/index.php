@@ -35,6 +35,11 @@
     require("_header.php");
 
     require("_noscript-warning.html");
+    
+    // TODO: _
+    require_once("php/Common.php");
+    Common::getLogger()->info('Test');
+    
     ?>
 
     <div class="container">

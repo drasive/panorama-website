@@ -1,4 +1,4 @@
-<?php
+<a href="ImageReader.php">ImageReader.php</a><?php
 
 require_once('php/ConfigurationReader.php');
 
@@ -34,7 +34,7 @@ class ImageReader  {
             // Return true if the filename doesn't contain "thumb"
             return !strpos(strtolower($fileName), 'thumb') !== false;
         });
-  
+        
         // Remove gaps in array keys (created by filtering)
         $imageFiles = array_values(array_filter($imageFiles));
         

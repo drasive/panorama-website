@@ -14,6 +14,7 @@ class ConfigurationReader  {
     protected static $imageFileFormat = 'imageFileFormat';
     protected static $archiveDuration = 'archiveDuration';
     protected static $archiveFrequency = 'archiveFrequency';
+    protected static $loggingFolder = 'loggingFolder';
     
     
     protected static function getConfiguration() {
@@ -49,6 +50,11 @@ class ConfigurationReader  {
     
     public static function getArchiveFrequency() {
         return self::getConfiguration()[self::$applicationSection][self::$archiveFrequency];
+    }
+    
+    
+    public static function getLoggingFolder() {
+        return self::getConfiguration()[self::$applicationSection][self::$loggingFolder];
     }
     
 }

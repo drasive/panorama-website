@@ -1,0 +1,8 @@
+{
+    "config": {
+        "vendor-dir": "wwwroot/vendor"
+    },
+    "require": {
+        "katzgrau/klogger": "1.0.*"
+    }
+}
