@@ -146,6 +146,9 @@ class ImageReader  {
             }
         }
         
+        // TODO: Make sure this works correctly (with images from notebook)
+        $imageFiles = $imageFilesFiltered;
+        
         // Parse info
         $images = array();
         foreach ($imageFiles as $imageFile) {
