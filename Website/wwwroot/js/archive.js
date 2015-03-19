@@ -9,8 +9,8 @@ $(function () {
 
     slider_scale_mode: "fit",
     slider_controls_always_on: false,
-    gallery_background_color: "#AAA",
+    gallery_background_color: "#DDD",
     gridpanel_background_color: "#EEE",
-    slider_textpanel_bg_color: "#EEE"
+    slider_textpanel_bg_color: "#888"
   });
 });

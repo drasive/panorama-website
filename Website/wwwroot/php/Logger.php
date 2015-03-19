@@ -18,7 +18,6 @@ class Logger  {
                 $level = Psr\Log\LogLevel::INFO;
             }
             
-            // TODO: _Array options not working
             self::$logger = new Katzgrau\KLogger\Logger($folder, $level, array (
                 'dateFormat' => 'Y-m-d H:i:s.u',
                 'extension' => 'log',
@@ -47,7 +46,7 @@ class Logger  {
         }
         
         if (ConfigurationReader::getDebugMode() == true) {
-            //self::logToUI('Error', $message, $object);
+            self::logToUI('Error', $message, $object);
         }
     }
     

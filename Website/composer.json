@@ -3,6 +3,6 @@
         "vendor-dir": "wwwroot/vendor"
     },
     "require": {
-        "katzgrau/klogger": "1.0.*"
+        "katzgrau/klogger": "dev-master"
     }
 }

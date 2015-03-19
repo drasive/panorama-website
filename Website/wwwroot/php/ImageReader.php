@@ -3,6 +3,9 @@
 require_once('php/ConfigurationReader.php');
 require_once('php/Logger.php');
 
+/**
+ * Contains functionality to read and parse panoramic images from the file system.
+ */
 class ImageReader  {
     
     private static function ParseCreationDate($imagePath) {
@@ -17,6 +20,11 @@ class ImageReader  {
     }
     
     
+    /**
+     * Gets the last (most recent) panoramic image or null, if none exists.
+     * 
+     * @return mixed The most recent panoramic image or null.
+     */
     public static function GetLastImage() {
         if (ConfigurationReader::getTestImages() == true) {
             // Return test image
@@ -67,6 +75,11 @@ class ImageReader  {
         return $image;
     }
     
+    /**
+     * Gets all archived panoramic images for the specified day.
+     * @param mixed $date The date to return the archived images for (unix timestamp).
+     * @return mixed All archived panoramic images for the specified day (empty when none exist).
+     */
     public static function GetArchiveImages($date) {
         if (ConfigurationReader::getTestImages() == true) {
             // Return test images

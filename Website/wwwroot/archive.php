@@ -31,7 +31,7 @@
     require_once("php/ConfigurationReader.php");
     require_once("php/Logger.php");
     
-    // Get date
+    // Get date parameter
     $dateParameter = null;    
     if(isset($_GET['date'])) {
         $dateParameter = $_GET['date'];
@@ -83,10 +83,12 @@
                 <?php
                 require_once("php/ImageReader.php");
                 
+                // Get archive images
                 $images = ImageReader::GetArchiveImages($date);
                 if (!is_null($images) && count($images) > 0) {
                     echo '<div id="gallery" class="gallery">';
                     
+                    // Output images
                     foreach ($images as $image) {
                         echo '<img src="'        . $image['thumbnailPath'] . '"' .
                                   'data-image="' . $image['imagePath']     . '"' .

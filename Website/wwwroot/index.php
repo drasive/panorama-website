@@ -45,6 +45,7 @@
                 <?php
                 require_once("php/ImageReader.php");
                 
+                // Get last image
                 $image = ImageReader::GetLastImage();
                 if (!is_null($image)) {
                     // Output info
