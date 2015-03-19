@@ -88,7 +88,6 @@ namespace DimitriVranken.PanoramaCreator
                     response.StatusCode == HttpStatusCode.Redirect)
                 {
                     // Download the response to a file
-                    // TODO: Make sure parent folder exists
                     using (var inputStream = response.GetResponseStream())
                     using (var outputStream = File.OpenWrite(destinationFile.FullName))
                     {

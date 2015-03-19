@@ -208,6 +208,7 @@ namespace DimitriVranken.PanoramaCreator
                 imageFiles.Add(imageFile);
 
                 Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, imageCount);
+                Common.CheckDirectory(imageFile);
                 _camera.TakeImage(imageFile);
 
                 // Rotate camera (not after the last image was taken)

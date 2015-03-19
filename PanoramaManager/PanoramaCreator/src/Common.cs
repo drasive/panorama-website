@@ -6,7 +6,7 @@ namespace DimitriVranken.PanoramaCreator
 {
     static class Common
     {
-        public static void CheckDirectory(string directoryPath)
+        private static void CheckDirectory(string directoryPath)
         {
             if (!Directory.Exists(directoryPath))
             {
@@ -24,7 +24,12 @@ namespace DimitriVranken.PanoramaCreator
             CheckDirectory(directory.FullName);
         }
 
-        public static void TryDeleteFile(string filePath)
+        public static void CheckDirectory(FileInfo childFile)
+        {
+            CheckDirectory(childFile.Directory);
+        }
+
+        private static void TryDeleteFile(string filePath)
         {
             if (File.Exists(filePath))
             {
