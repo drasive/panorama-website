@@ -9,7 +9,31 @@ namespace DimitriVranken.PanoramaCreator
 {
     class BorderImageStitcher : ImageStitcher
     {
-        // TODO: _Implement border image stitcher
+        // TODO: Rename?
+        private static Bitmap MergeImages(Image image1, Image image2, int offset = 0)
+        {
+            if (offset < -image1.Width)
+            {
+                throw new ArgumentOutOfRangeException("offset");
+            }
+
+            var mergedWidth = image1.Width + image2.Width + offset;
+            var mergedHeight = image1.Height > image2.Height
+                ? image1.Height
+                : image2.Height;
+
+            var mergedImage = new Bitmap(mergedWidth, mergedHeight);
+            using (var graphics = Graphics.FromImage(mergedImage))
+            {
+                graphics.DrawImage(image1, new Rectangle(0, 0, image1.Width, image1.Height));
+
+                // Draw image 2 at the right border of image 1
+                graphics.DrawImage(image2, new Rectangle(image1.Width + offset, 0, image2.Width, image2.Height));
+            }
+
+            return mergedImage;
+        }
+
 
         public override Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles)
         {
@@ -38,81 +62,68 @@ namespace DimitriVranken.PanoramaCreator
             }
 
 
-            //var imagesRaw = new List<Bitmap>();
-            //var images = new List<Bitmap>();
-            //try
-            //{
-            //    // Load raw bitmaps
-            //    Logger.Default.Debug("PanoramicGenerator: Loading bitmaps");
-            //
-            //    foreach (var imageFile in imageFiles)
-            //    {
-            //        if (!imageFile.Exists)
-            //        {
-            //            throw new FileNotFoundException(String.Format(
-            //                    "The snapshot '{0}' doesn't exist.",
-            //                    imageFile));
-            //        }
-            //
-            //        imagesRaw.Add(new Bitmap(imageFile.FullName));
-            //    }
-            //
-            //    // Process raw bitmaps
-            //    Logger.Default.Debug("PanoramicGenerator: Processing bitmaps");
-            //
-            //    images = imagesRaw.Select(imageRaw => ReduceImageResolution(imageRaw, maximumProcessingResolution)).ToList();
-            //    images = images.Select(image => ConvertImageFormat(image, PixelFormat.Format24bppRgb)).ToList();
-            //
-            //    // Merge first two images
-            //    Logger.UserInterface.Info("Merging images 1/{0}", images.Count() - 1);
-            //    var panoramicImage = MergeImages(images[0], images[1]);
-            //
-            //    // Merge remaining images
-            //    for (var imageIndex = 2; imageIndex < images.Count(); imageIndex++)
-            //    {
-            //        Logger.UserInterface.Info("Merging images {0}/{1}", imageIndex, images.Count() - 1);
-            //        panoramicImage = MergeImages(panoramicImage, images[imageIndex]);
-            //    }
-            //
-            //    // Process panoramic image
-            //    Logger.Default.Debug("PanoramicGenerator: Processing the panoramic image");
-            //
-            //    panoramicImage = ReduceImageResolution(panoramicImage, maximumOutputResolution);
-            //
-            //    // Return
-            //    return panoramicImage;
-            //}
-            //finally
-            //{
-            //    // Dispose bitmaps
-            //    foreach (var image in images)
-            //    {
-            //        if (image != null)
-            //        {
-            //            image.Dispose();
-            //        }
-            //    }
-            //
-            //    foreach (var imageRaw in imagesRaw)
-            //    {
-            //        if (imageRaw != null)
-            //        {
-            //            imageRaw.Dispose();
-            //        }
-            //    }
-            //}
+            var imagesRaw = new List<Bitmap>();
+            var images = new List<Bitmap>();
+            try
+            {
+                // Load raw bitmaps
+                Logger.Default.Debug("BorderImageStitcher: Loading bitmaps");
 
-            return null;
-        }
+                foreach (var imageFile in imageFiles)
+                {
+                    if (!imageFile.Exists)
+                    {
+                        throw new FileNotFoundException(String.Format(
+                                "The snapshot '{0}' doesn't exist.",
+                                imageFile));
+                    }
 
-        public override Bitmap GenerateThumbnail(Bitmap image, int maximumResolution)
-        {
-            //if (maximumResolution < 10 || maximumResolution > 7680)
-            //{
-            //    throw new ArgumentOutOfRangeException("maximumResolution");
-            //}
-            //
-            //return ReduceImageResolution(image, maximumResolution);
+                    imagesRaw.Add(new Bitmap(imageFile.FullName));
+                }
+
+                // Process raw bitmaps
+                Logger.Default.Debug("BorderImageStitcher: Processing bitmaps");
+
+                images = imagesRaw.Select(imageRaw => ReduceImageResolution(imageRaw, maximumProcessingResolution)).ToList();
+                images = images.Select(image => ConvertImageFormat(image, PixelFormat.Format24bppRgb)).ToList();
+
+                // Merge images
+                Logger.UserInterface.Info("Merging images 1/{0}", images.Count() - 1);
+                var panoramicImage = MergeImages(images[0], images[1]);
+
+                for (var imageIndex = 2; imageIndex < images.Count(); imageIndex++)
+                {
+                    Logger.UserInterface.Info("Merging images {0}/{1}", imageIndex, images.Count() - 1);
+                    panoramicImage = MergeImages(panoramicImage, images[imageIndex]);
+                }
+
+                // Process panoramic image
+                Logger.Default.Debug("BorderImageStitcher: Processing the panoramic image");
+
+                panoramicImage = ReduceImageResolution(panoramicImage, maximumOutputResolution);
+
+                // Return
+                return panoramicImage;
+            }
+            finally
+            {
+                // Dispose bitmaps
+                foreach (var image in images)
+                {
+                    if (image != null)
+                    {
+                        image.Dispose();
+                    }
+                }
+
+                foreach (var imageRaw in imagesRaw)
+                {
+                    if (imageRaw != null)
+                    {
+                        imageRaw.Dispose();
+                    }
+                }
+            }
 
             return null;
         }
