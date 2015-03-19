@@ -225,7 +225,6 @@ namespace DimitriVranken.PanoramaCreator
         {
             Common.CheckDirectory(outputDirectory);
 
-            // TODO: Use format from config
             var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             var imageName = imageTimestamp + ".png";
             var imageFile = Path.Combine(outputDirectory.FullName, imageName);
@@ -245,7 +244,6 @@ namespace DimitriVranken.PanoramaCreator
             // Save thumbnail
             if (thumbnail != null)
             {
-                // TODO: Use format from config
                 var thumbnailName = imageTimestamp + "_thumb.png";
                 var thumbnailFile = Path.Combine(outputDirectory.FullName, thumbnailName);
 
@@ -264,11 +262,9 @@ namespace DimitriVranken.PanoramaCreator
             try
             {
                 // Generate image
-                // TODO: Use resolution from config
                 image = imageStitcher.StitchPanoramicImage(imageFiles);
                 if (saveThumbnail)
                 {
-                    // TODO: Use resolution from config
                     thumbnail = imageStitcher.GenerateThumbnail(image, 480);
                 }
 
@@ -278,7 +274,6 @@ namespace DimitriVranken.PanoramaCreator
                 SavePanoramicImage(outputDirectory, image, thumbnail);
                 if (saveToArchive)
                 {
-                    // TODO: Use format from config
                     var archiveSubdirectoryName = DateTime.Now.ToString("yyyy-MM-dd");
                     var archiveSubdirectory = new DirectoryInfo(Path.Combine(
                         outputDirectory.FullName,
