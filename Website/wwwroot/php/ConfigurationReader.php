@@ -2,22 +2,22 @@
 
 class ConfigurationReader  {
     
-    protected static $configurationFile = 'config.ini';
+    private static $configurationFile = 'app.ini';
     
-    protected static $releaseSection = 'release';
-    protected static $debugMode = 'debugMode';
-    protected static $testImages = 'testImages';
+    private static $releaseSection = 'release';
+    private static $debugMode = 'debugMode';
+    private static $testImages = 'testImages';
     
-    protected static $applicationSection = 'application';
-    protected static $imageFolder = 'imageFolder';
-    protected static $imageSubfolderFormat = 'imageSubfolderFormat';
-    protected static $imageFileFormat = 'imageFileFormat';
-    protected static $archiveDuration = 'archiveDuration';
-    protected static $archiveFrequency = 'archiveFrequency';
-    protected static $loggingFolder = 'loggingFolder';
+    private static $applicationSection = 'application';
+    private static $imageFolder = 'imageFolder';
+    private static $imageSubfolderFormat = 'imageSubfolderFormat';
+    private static $imageFileFormat = 'imageFileFormat';
+    private static $archiveDuration = 'archiveDuration';
+    private static $archiveFrequency = 'archiveFrequency';
+    private static $loggingFolder = 'loggingFolder';
     
     
-    protected static function getConfiguration() {
+    private static function getConfiguration() {
         return parse_ini_file(self::$configurationFile, true);
     }
     

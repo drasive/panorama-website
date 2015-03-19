@@ -1,6 +1,7 @@
-<a href="ImageReader.php">ImageReader.php</a><?php
+<?php
 
 require_once('php/ConfigurationReader.php');
+require_once('php/Logger.php');
 
 class ImageReader  {
     
@@ -38,10 +39,7 @@ class ImageReader  {
         // Remove gaps in array keys (created by filtering)
         $imageFiles = array_values(array_filter($imageFiles));
         
-        // TODO: Refactor into logging
-        if (ConfigurationReader::getDebugMode() == true) {
-            echo '[DEBUG] Images (' . count($imageFiles) . '): ' . print_r($imageFiles, true) . PHP_EOL;
-        }
+        Logger::logDebug('[ImageReader] Current images (' . count($imageFiles) . '): ', $imageFiles);
         
         if (count($imageFiles) === 0) {
             // No images
@@ -59,11 +57,14 @@ class ImageReader  {
         $thumbnailPath = self::GenerateThumbnailPath($imageFolder, $imagePath);
         $creationDate = self::ParseCreationDate($imagePath);
         
-        return array(
+        $image = array(
                 'imagePath'     => $imagePath,
                 'thumbnailPath' => $thumbnailPath,
                 'creationDate'  => $creationDate
             );
+        
+        Logger::logDebug('[ImageReader] Current image: ', $image);
+        return $image;
     }
     
     public static function GetArchiveImages($date) {
@@ -109,14 +110,11 @@ class ImageReader  {
         // Remove gaps in array keys (created by filtering)
         $imageFiles = array_values(array_filter($imageFiles));
         
+        Logger::logDebug('[ImageReader] Archived images (' . count($imageFiles) . '): ', $imageFiles);
+        
         if (count($imageFiles) === 0) {
             // No images archived for that day
             return array();
-        }
-        
-        // TODO: Refactor into logging
-        if (ConfigurationReader::getDebugMode() == true) {
-            echo '[DEBUG] Images (' . count($imageFiles) . '): ' . print_r($imageFiles, true) . PHP_EOL;
         }
         
         // Filter images based on time between creation        
@@ -127,8 +125,8 @@ class ImageReader  {
             $currentImage = $imageFiles[$imageIndex];
             $currentCreationDate = self::ParseCreationDate($currentImage);
             
-            if ($lastCreationDate == null ||
-                abs($lastCreationDate - $currentCreationDate) >= $archiveFrequency) {
+            if ($lastCreationDate == null
+                || abs($lastCreationDate - $currentCreationDate) >= $archiveFrequency) {
                 
                 array_push($imageFilesFiltered, $currentImage);
                 $lastCreationDate = $currentCreationDate;
@@ -150,6 +148,7 @@ class ImageReader  {
             array_push($images, $image);
         }
         
+        Logger::logDebug('[ImageReader] Archive images (' . count($images) . '): ', $images);
         return $images;
     }
     

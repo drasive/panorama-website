@@ -2,8 +2,8 @@
 
 class UiHelper  {
 
-    protected static $activePage = null;
-    protected static $activeSubpage = null;
+    private static $activePage = null;
+    private static $activeSubpage = null;
 
     
     public static function SetActivePage($newActivePage) {

@@ -29,6 +29,7 @@
 <body>
     <?php
     require_once("php/ConfigurationReader.php");
+    require_once("php/Logger.php");
     
     // Get date
     $dateParameter = null;    
@@ -53,17 +54,11 @@
         $defaultDate = strtotime(date('Y-m-d'));
         $date = $defaultDate;
         
-        if (ConfigurationReader::getDebugMode() == true) {
-            echo '[DEBUG] "date" HTTP parameter not existing or invalid, ' . 
-            'using the default value "' . date('Y-m-d', $defaultDate) . '"' . 
-            '<br />' . PHP_EOL;
-        }
+        Logger::logDebug('[ARCHIVE] "date" HTTP parameter not existing or invalid, ' . 
+                         'using the default value "' . date('Y-m-d', $defaultDate));
     }
     
-    if (ConfigurationReader::getDebugMode() == true) {
-        echo '[DEBUG] "date" parameter = "' . date('Y-m-d', $date) . '"' .
-        '<br />' . PHP_EOL;
-    }
+    Logger::logDebug('[ARCHIVE] "date" HTTP parameter = "' . date('Y-m-d', $date) . '"');
     ?>
 
     <?php
