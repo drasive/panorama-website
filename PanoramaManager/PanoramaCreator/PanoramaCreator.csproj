@@ -75,7 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\BorderImageStitcher.cs" />
+    <Compile Include="src\CurvedImageStitcher.cs" />
     <Compile Include="src\ImageSticherType.cs" />
     <Compile Include="src\Logger.cs" />
     <Compile Include="src\CameraDirection.cs" />
@@ -83,7 +83,7 @@
     <Compile Include="src\Common.cs" />
     <Compile Include="src\Options.cs" />
     <Compile Include="src\ImageSticher.cs" />
-    <Compile Include="src\FeatureImageStitcher.cs" />
+    <Compile Include="src\FlatImageStitcher.cs" />
     <Compile Include="src\PanoramaCreator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

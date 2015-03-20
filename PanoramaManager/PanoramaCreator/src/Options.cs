@@ -18,8 +18,8 @@ namespace DimitriVranken.PanoramaCreator
             HelpText = "The number of images to generate the panoramic image from.")]
         public int ImageCount { get; set; }
 
-        [Option('m', "merge-mode", DefaultValue = ImageStitcherType.Border,
-            HelpText = "The mode to use for stitching the panoramic image together (Border or Feature).")]
+        [Option('m', "merge-mode", DefaultValue = ImageStitcherType.Curved,
+            HelpText = "The mode to use for stitching the panoramic image together (curved or flat).")]
         public ImageStitcherType MergeMode { get; set; }
 
         [Option('o', "output", Required = true,

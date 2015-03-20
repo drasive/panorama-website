@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace DimitriVranken.PanoramaCreator
 {
-    class BorderImageStitcher : ImageStitcher
+    class CurvedImageStitcher : ImageStitcher
     {
-        // TODO: Rename?
+        // TODO: Comment
         private static Bitmap MergeImages(Image image1, Image image2, int offset = 0)
         {
             if (offset < -image1.Width)

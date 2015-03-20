@@ -9,9 +9,9 @@ using Accord.Imaging.Filters;
 
 namespace DimitriVranken.PanoramaCreator
 {
-    class FeatureImageStitcher : ImageStitcher
+    class FlatImageStitcher : ImageStitcher
     {
-        // TODO: Rename?
+        // TODO: Comment
         private static Bitmap MergeImages(Bitmap image1, Bitmap image2)
         {
             // Detect feature points using Surf Corners Detector

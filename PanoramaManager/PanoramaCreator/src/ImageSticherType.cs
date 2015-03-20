@@ -2,7 +2,7 @@
 {
     enum ImageStitcherType
     {
-        Border,
-        Feature
+        Curved,
+        Flat
     }
 }

@@ -358,11 +358,11 @@ namespace DimitriVranken.PanoramaCreator
                     ImageStitcher imageStitcher;
                     switch (Options.MergeMode)
                     {
-                        case ImageStitcherType.Border:
-                            imageStitcher = new BorderImageStitcher();
+                        case ImageStitcherType.Curved:
+                            imageStitcher = new CurvedImageStitcher();
                             break;
-                        case ImageStitcherType.Feature:
-                            imageStitcher = new FeatureImageStitcher();
+                        case ImageStitcherType.Flat:
+                            imageStitcher = new FlatImageStitcher();
                             break;
                         default:
                             throw new Exception("Unknown enum value encountered.");
