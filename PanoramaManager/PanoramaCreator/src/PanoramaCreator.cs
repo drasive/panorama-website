@@ -17,6 +17,7 @@ namespace DimitriVranken.PanoramaCreator
         private static Camera _camera;
         public static readonly Options Options = new Options();
 
+
         /// <summary>
         /// Print the application heading.
         /// </summary>
@@ -180,6 +181,7 @@ namespace DimitriVranken.PanoramaCreator
             return !optionInvalid;
         }
 
+
         /// <summary>
         /// Setup the network camera with the correct settings.
         /// </summary>
@@ -202,24 +204,54 @@ namespace DimitriVranken.PanoramaCreator
         }
 
         /// <summary>
-        /// Captures images in a curved field of view using the network camera and saves them temporarily.
+        /// Rotates the camera left or right for capturing a series of images.
+        /// </summary>
+        /// <param name="right">
+        /// Indicates whether the camera should be turned to the right (true) or to the left (false).</param>
+        /// <param name="overlayImages">
+        /// Indicates whether the images in the series should overlap (true) or not (false).</param>
+        private static void RotateCamera(bool right, bool overlayImages)
+        {
+            // TODO: (Networking) Perfect pan speeds
+
+            var direction = right
+                ? CameraDirection.Right
+                : CameraDirection.Left;
+
+            if (overlayImages)
+            {
+                // Rotate so the images overlap a bit
+                _camera.Rotate(direction, 0);
+            }
+            else
+            {
+                // Rotate so the new image shares its border with the last image as exact as possible
+                _camera.Rotate(direction, 0);
+                _camera.Rotate(direction, 0);
+                _camera.Rotate(direction, 0);
+                _camera.Rotate(direction, -5);
+                _camera.Rotate(direction, -5);
+            }
+        }
+
+        /// <summary>
+        /// Captures a series of images using the network camera and saves them temporarily.
         /// </summary>
         /// <param name="imageCount">The amount of images to capture.</param>
+        /// <param name="overlayImages"></param>
         /// <returns>The files that the captured images were saved to.</returns>
-        private static List<FileInfo> CaptureImages(int imageCount)
+        private static List<FileInfo> CaptureImages(int imageCount, bool overlayImages)
         {
-            // TODO: _Adapt to curved stitcher
-
             // Move into starting position
             _camera.Rotate(CameraDirection.Home);
 
-            // TODO: 3@1 for feature stitcher, 3@0,-5,-5 for border stitcher
-            const int panSpeed = 2;
-
-            var imagesCapturedToTheLeft = Math.Floor(imageCount / 2d); // Equal or one less than images captured to the right
-            for (var stepsExecuted = 0; stepsExecuted < imagesCapturedToTheLeft; stepsExecuted++)
+            // Capture a little less images on the left than to the right
+            var imagesToCaptureOnTheLeft = imageCount % 2 == 0
+                ? (imageCount / 2) - 1
+                : (int)Math.Floor(imageCount / 2d);
+            for (var stepsExecuted = 0; stepsExecuted < imagesToCaptureOnTheLeft; stepsExecuted++)
             {
-                _camera.Rotate(CameraDirection.Left, panSpeed);
+                RotateCamera(false, overlayImages);
             }
 
             // Capture images
@@ -241,12 +273,13 @@ namespace DimitriVranken.PanoramaCreator
                 // Rotate camera (not after the last image was captured)
                 if (imageIndex < imageCount)
                 {
-                    _camera.Rotate(CameraDirection.Right, panSpeed);
+                    RotateCamera(true, overlayImages);
                 }
             }
 
             return imageFiles;
         }
+
 
         /// <summary>
         /// Saves the panoramic image to the file system.
@@ -368,7 +401,7 @@ namespace DimitriVranken.PanoramaCreator
                     SetupCamera(Options.IpAddressParsed,
                         Options.ProxyAddressParsed, Options.ProxyUsername, Options.ProxyPassword);
 
-                    imageFiles = CaptureImages(Options.ImageCount);
+                    imageFiles = CaptureImages(Options.ImageCount, Options.MergeMode == ImageStitcherType.Flat);
                 }
                 else
                 {
