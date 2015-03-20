@@ -7,9 +7,11 @@ using System.Linq;
 
 namespace DimitriVranken.PanoramaCreator
 {
+    /// <summary>
+    /// Stitches images together to a curved panoramic image.
+    /// </summary>
     class CurvedImageStitcher : ImageStitcher
     {
-        // TODO: Comment
         private static Bitmap MergeImages(Image image1, Image image2, int offset = 0)
         {
             if (offset < -image1.Width)
@@ -35,6 +37,11 @@ namespace DimitriVranken.PanoramaCreator
         }
 
 
+        /// <summary>
+        /// Stitch together a curved panoramic image.
+        /// </summary>
+        /// <param name="imageFiles">The images to stitch together.</param>
+        /// <returns>The stitched together panoramic image.</returns>
         public override Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles)
         {
             if (imageFiles.Count() < 2 || imageFiles.Count() > 100)
@@ -45,6 +52,13 @@ namespace DimitriVranken.PanoramaCreator
             return StitchPanoramicImage(imageFiles, 1920, 7680);
         }
 
+        /// <summary>
+        /// Stitch together a curved panoramic image.
+        /// </summary>
+        /// <param name="imageFiles">The images to stitch together.</param>
+        /// <param name="maximumProcessingResolution">The maximum resolution for processing the images (shortest side).</param>
+        /// <param name="maximumOutputResolution">The maximum resolution of the panoramic image (shortest side).</param>
+        /// <returns>The stitched together panoramic image.</returns>
         public override Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles,
             int maximumProcessingResolution, int maximumOutputResolution)
         {

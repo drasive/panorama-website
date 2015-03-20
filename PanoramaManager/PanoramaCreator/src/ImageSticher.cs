@@ -6,6 +6,9 @@ using System.IO;
 
 namespace DimitriVranken.PanoramaCreator
 {
+    /// <summary>
+    /// Stitches images together to a panoramic image.
+    /// </summary>
     abstract class ImageStitcher
     {
         protected static Bitmap ChangeImageResolution(Image image, decimal scalingFactor)
@@ -45,11 +48,29 @@ namespace DimitriVranken.PanoramaCreator
         }
 
 
+        /// <summary>
+        /// Stitch together a panoramic image.
+        /// </summary>
+        /// <param name="imageFiles">The images to stitch together.</param>
+        /// <returns>The stitched together panoramic image.</returns>
         public abstract Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles);
 
+        /// <summary>
+        /// Stitch together a panoramic image.
+        /// </summary>
+        /// <param name="imageFiles">The images to stitch together.</param>
+        /// <param name="maximumProcessingResolution">The maximum resolution for processing the images (shortest side).</param>
+        /// <param name="maximumOutputResolution">The maximum resolution of the panoramic image (shortest side).</param>
+        /// <returns>The stitched together panoramic image.</returns>
         public abstract Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles,
             int maximumProcessingResolution, int maximumOutputResolution);
 
+        /// <summary>
+        /// Generates an image thumbnail with a low resolution.
+        /// </summary>
+        /// <param name="image">The image to generate a thumbnail of.</param>
+        /// <param name="maximumResolution">The maximum resolution of the thumbnail (shortest side).</param>
+        /// <returns>The generated thumbnail.</returns>
         public Bitmap GenerateThumbnail(Bitmap image, int maximumResolution)
         {
             if (maximumResolution < 10 || maximumResolution > 7680)

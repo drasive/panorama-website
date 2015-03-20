@@ -4,13 +4,26 @@ using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
 {
+    /// <summary>
+    /// A LevelOne FCS-1060 or WCS-2060 network camera.
+    /// </summary>
     class Camera
     {
+        /// <summary>
+        /// The ip address of the camera.
+        /// </summary>
         public IPAddress IpAddress { get; private set; }
 
+        /// <summary>
+        /// The web proxy to use for accessing the camera.
+        /// </summary>
         public WebProxy Proxy { get; private set; }
 
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="Camera"/> class.
+        /// </summary>
+        /// <param name="ipAddress">The ip address of the camera.</param>
         public Camera(IPAddress ipAddress)
         {
             if (ipAddress == null)
@@ -21,6 +34,11 @@ namespace DimitriVranken.PanoramaCreator
             IpAddress = ipAddress;
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="Camera"/> class.
+        /// </summary>
+        /// <param name="ipAddress">The ip address of the camera.</param>
+        /// <param name="proxy">The web proxy to use for accessing the camera.</param>
         public Camera(IPAddress ipAddress, WebProxy proxy)
             : this(ipAddress)
         {
@@ -113,7 +131,11 @@ namespace DimitriVranken.PanoramaCreator
         }
 
 
-        public void TakeImage(FileInfo destinationFile)
+        /// <summary>
+        /// Takes an image using the camera and saves it to the specified file.
+        /// </summary>
+        /// <param name="destinationFile">The file to save the image to. The parent folder has to exist.</param>
+        public void CaptureImage(FileInfo destinationFile)
         {
             if (destinationFile == null)
             {
@@ -131,6 +153,11 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
+        /// <summary>
+        /// Rotate the camera.
+        /// </summary>
+        /// <param name="direction">The direction to turn the camera in.</param>
+        /// <param name="speed">The speed to turn the camera with.</param>
         public void Rotate(CameraDirection direction, int speed = 0)
         {
             if (speed < -5 || speed > 5)

@@ -9,9 +9,11 @@ using Accord.Imaging.Filters;
 
 namespace DimitriVranken.PanoramaCreator
 {
+    /// <summary>
+    /// Stitches images together to a flat panoramic image.
+    /// </summary>
     class FlatImageStitcher : ImageStitcher
     {
-        // TODO: Comment
         private static Bitmap MergeImages(Bitmap image1, Bitmap image2)
         {
             // Detect feature points using Surf Corners Detector
@@ -36,6 +38,11 @@ namespace DimitriVranken.PanoramaCreator
         }
 
 
+        /// <summary>
+        /// Stitch together a flat panoramic image.
+        /// </summary>
+        /// <param name="imageFiles">The images to stitch together.</param>
+        /// <returns>The stitched together panoramic image.</returns>
         public override Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles)
         {
             if (imageFiles.Count() < 2 || imageFiles.Count() > 100)
@@ -46,6 +53,13 @@ namespace DimitriVranken.PanoramaCreator
             return StitchPanoramicImage(imageFiles, 1920, 7680);
         }
 
+        /// <summary>
+        /// Stitch together a flat panoramic image.
+        /// </summary>
+        /// <param name="imageFiles">The images to stitch together.</param>
+        /// <param name="maximumProcessingResolution">The maximum resolution for processing the images (shortest side).</param>
+        /// <param name="maximumOutputResolution">The maximum resolution of the panoramic image (shortest side).</param>
+        /// <returns>The stitched together panoramic image.</returns>
         public override Bitmap StitchPanoramicImage(IList<FileInfo> imageFiles,
             int maximumProcessingResolution, int maximumOutputResolution)
         {

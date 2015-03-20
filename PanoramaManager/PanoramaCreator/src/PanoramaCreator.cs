@@ -8,20 +8,35 @@ using System.Net;
 
 namespace DimitriVranken.PanoramaCreator
 {
+    /// <summary>
+    /// Creates and saves panoramic images from the images automatically taken using a network camera.
+    /// </summary>
+    /// <remarks>Repository: https://github.com/drasive/panorama-website</remarks>
     static class PanoramaCreator
     {
+        private static Camera _camera;
         public static readonly Options Options = new Options();
-        static Camera _camera;
 
+        /// <summary>
+        /// Print the application heading.
+        /// </summary>
         private static void PrintHeading()
         {
+            // Get assembly info
             var assemblyInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
+
+            // Print heading
             Console.WriteLine("{0} {1}", assemblyInfo.ProductName, assemblyInfo.ProductVersion);
             Console.WriteLine("{0}", assemblyInfo.LegalCopyright);
 
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Parse the command line arguments into options.
+        /// </summary>
+        /// <param name="options">The received command line arguments.</param>
+        /// <returns>True if all parameters could be parsed without errors; otherwise false.</returns>
         private static bool ParseOptions(string[] options)
         {
             // Parse options
@@ -165,6 +180,13 @@ namespace DimitriVranken.PanoramaCreator
             return !optionInvalid;
         }
 
+        /// <summary>
+        /// Setup the network camera with the correct settings.
+        /// </summary>
+        /// <param name="ipAddress">The ip address of the camera.</param>
+        /// <param name="proxyAddress">The proxy address of the camera.</param>
+        /// <param name="proxyUsername">The proxy username of the camera.</param>
+        /// <param name="proxyPassword">The proxy password of the camera.</param>
         private static void SetupCamera(IPAddress ipAddress,
             Uri proxyAddress, string proxyUsername, string proxyPassword)
         {
@@ -179,9 +201,14 @@ namespace DimitriVranken.PanoramaCreator
             _camera = new Camera(ipAddress, proxy);
         }
 
-        private static List<FileInfo> TakeImages(int imageCount)
+        /// <summary>
+        /// Captures images in a curved field of view using the network camera and saves them temporarily.
+        /// </summary>
+        /// <param name="imageCount">The amount of images to capture.</param>
+        /// <returns>The files that the captured images were saved to.</returns>
+        private static List<FileInfo> CaptureImages(int imageCount)
         {
-            // TODO: _Adapt to border stitcher
+            // TODO: _Adapt to curved stitcher
 
             // Move into starting position
             _camera.Rotate(CameraDirection.Home);
@@ -189,17 +216,17 @@ namespace DimitriVranken.PanoramaCreator
             // TODO: 3@1 for feature stitcher, 3@0,-5,-5 for border stitcher
             const int panSpeed = 2;
 
-            var imagesTakenToTheLeft = Math.Floor(imageCount / 2d); // Equal or one less than images taken to the right
-            for (var stepsExecuted = 0; stepsExecuted < imagesTakenToTheLeft; stepsExecuted++)
+            var imagesCapturedToTheLeft = Math.Floor(imageCount / 2d); // Equal or one less than images captured to the right
+            for (var stepsExecuted = 0; stepsExecuted < imagesCapturedToTheLeft; stepsExecuted++)
             {
                 _camera.Rotate(CameraDirection.Left, panSpeed);
             }
 
-            // Take images
+            // Capture images
             var imageFiles = new List<FileInfo>();
             for (var imageIndex = 1; imageIndex <= imageCount; imageIndex++)
             {
-                // Take image
+                // Capture image
                 var imageTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                 var imagePath = Path.Combine(
                     Common.GetTemporaryFolder(),
@@ -209,9 +236,9 @@ namespace DimitriVranken.PanoramaCreator
 
                 Logger.UserInterface.Info("Taking picture {0}/{1}", imageIndex, imageCount);
                 Common.CheckDirectory(imageFile);
-                _camera.TakeImage(imageFile);
+                _camera.CaptureImage(imageFile);
 
-                // Rotate camera (not after the last image was taken)
+                // Rotate camera (not after the last image was captured)
                 if (imageIndex < imageCount)
                 {
                     _camera.Rotate(CameraDirection.Right, panSpeed);
@@ -221,6 +248,12 @@ namespace DimitriVranken.PanoramaCreator
             return imageFiles;
         }
 
+        /// <summary>
+        /// Saves the panoramic image to the file system.
+        /// </summary>
+        /// <param name="outputDirectory">The directory to save the image to.</param>
+        /// <param name="image">The panoramic image to save.</param>
+        /// <param name="thumbnail">The thumbnail of the image to save. Can be null.</param>
         private static void SavePanoramicImage(DirectoryInfo outputDirectory, Image image, Image thumbnail = null)
         {
             Common.CheckDirectory(outputDirectory);
@@ -254,6 +287,14 @@ namespace DimitriVranken.PanoramaCreator
             }
         }
 
+        /// <summary>
+        /// Generates a panoramic image from multiple captured images and saves them to the file system. 
+        /// </summary>
+        /// <param name="imageStitcher">The image stitcher to use for generating the panoramic image.</param>
+        /// <param name="imageFiles">The </param>
+        /// <param name="outputDirectory">The directory the panoramic image should be saved to.</param>
+        /// <param name="saveToArchive">If the panoramic image should be saved to an archive folder too.</param>
+        /// <param name="saveThumbnail">If a thumbnail of the panoramic image should be generated and saved.</param>
         private static void GenerateAndSavePanoramicImage(ImageStitcher imageStitcher, IList<FileInfo> imageFiles,
             DirectoryInfo outputDirectory, bool saveToArchive, bool saveThumbnail)
         {
@@ -327,14 +368,15 @@ namespace DimitriVranken.PanoramaCreator
                     SetupCamera(Options.IpAddressParsed,
                         Options.ProxyAddressParsed, Options.ProxyUsername, Options.ProxyPassword);
 
-                    imageFiles = TakeImages(Options.ImageCount);
+                    imageFiles = CaptureImages(Options.ImageCount);
                 }
                 else
                 {
-                    // Use example images
+                    // Output warning
                     Logger.UserInterface.Warn("Not taking any images with the network camera, " +
                                               "using example images instead (option --no-camera is set)");
 
+                    // Use example images
                     for (var imageFileIndex = 1; imageFileIndex <= Options.ImageCount; imageFileIndex++)
                     {
                         var imageName = String.Format("Snapshot {0}.jpg", imageFileIndex);
@@ -355,6 +397,7 @@ namespace DimitriVranken.PanoramaCreator
 
                 if (!Options.NoMerge)
                 {
+                    // Use the requested image stitcher
                     ImageStitcher imageStitcher;
                     switch (Options.MergeMode)
                     {
@@ -373,6 +416,7 @@ namespace DimitriVranken.PanoramaCreator
                 }
                 else
                 {
+                    // Output warning
                     Logger.UserInterface.Warn("Not merging the snapshots into a panoramic image " +
                                               "(option --no-merge is set)");
 
@@ -407,7 +451,7 @@ namespace DimitriVranken.PanoramaCreator
                 Console.WriteLine();
                 Logger.UserInterface.Fatal("A fatal error occurred: {0}" + Environment.NewLine +
                                            "See the log file for more information.", exception.Message);
-                Logger.Default.FatalException("", exception);
+                Logger.Default.FatalException("A fatal error occurred", exception);
 
 #if DEBUG
                 Console.ReadLine();
