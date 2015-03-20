@@ -1,3 +1,3 @@
 # TODO
 
-- Test with images from notebook
+- Full test (with images from notebook)

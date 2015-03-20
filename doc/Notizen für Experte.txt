@@ -1,0 +1,23 @@
+# Notizen für Experten
+
+Schüler: Dimitri Vranken, IAP12A
+Experte: B. Duc
+Anforderungen: PHP 5.4, .NET Framework 4.5
+
+## Webseite
+Quellcode: /Website/wwwroot
+Hauptfiles: /index.php, /archive.php, /php/ImageReader.php
+
+Build: /panorama-creator-v1.0.0/Website
+Konfiguration: app.ini (Standardwerte sind sinnvoll) 
+
+## Panorama Script
+Quellcode: /PanoramaManager/PanoramaCreator
+Hauptfiles: /src/PanoramaCreator.cs, /src/Camera.cs, /src/CurvedImageStitcher.cs
+
+Build: /panorama-creator-v1.0.0/PanoramaCreator
+Konfiguration: Über Kommandozeilenargumente (dokumentiert im Benutzerhandbuch)
+Argumente zum Testen: PanoramaCreator.exe -a "[KAMERA-IP]" -o "C:\xampp\htdocs\[WEBSITE-ORDNER]\images\panoramic" -at --proxy-address "[PROXY-ADRESSE]" --proxy-username "[PROXY-BENUTZERNAME]" --proxy-password "[PROXY-PASSWORT]" -f
+
+## Dokumentation
+Ordner: /doc
