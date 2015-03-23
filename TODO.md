@@ -1,8 +1,7 @@
 # TODO
 
 ## General
-- Finish manual
-- Test example params in notes for expert
+- Test example params in notes for expert and manual
 
 ## PanoramaCreator
 - (Network) Improve pan speeds
