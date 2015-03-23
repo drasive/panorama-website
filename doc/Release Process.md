@@ -20,7 +20,7 @@
 
 ## General
 - Create "[release]/doc"
-	- Add user manual
+	- Add all .pdf files from "/doc"
 	- Add link to repository
 
 - Create git tag

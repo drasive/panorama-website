@@ -2,10 +2,10 @@
 
 ## General
 - Finish manual
+- Test example params in notes for expert
 
 ## PanoramaCreator
-- (Network) Check rights to access camera
-- Work on code TODOs
+- (Network) Improve pan speeds
 
 - Full test (both image stitchers)
 

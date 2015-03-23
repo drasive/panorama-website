@@ -17,7 +17,7 @@ Hauptfiles: /src/PanoramaCreator.cs, /src/Camera.cs, /src/CurvedImageStitcher.cs
 
 Build: /panorama-creator-v1.0.0/PanoramaCreator
 Konfiguration: Über Kommandozeilenargumente (dokumentiert im Benutzerhandbuch)
-Argumente zum Testen: PanoramaCreator.exe -a "[KAMERA-IP]" -o "C:\xampp\htdocs\[WEBSITE-ORDNER]\images\panoramic" -at --proxy-address "[PROXY-ADRESSE]" --proxy-username "[PROXY-BENUTZERNAME]" --proxy-password "[PROXY-PASSWORT]" -f
+Argumente zum Testen: PanoramaCreator.exe -c "[KAMERA-IP]" -o "C:\xampp\htdocs\[WEBSITE-ORDNER]\images\panoramic" -at --proxy-address "[PROXY-ADRESSE]" --proxy-username "[PROXY-BENUTZERNAME]" --proxy-password "[PROXY-PASSWORT]" -f
 
 ## Dokumentation
 Ordner: /doc

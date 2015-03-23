@@ -60,7 +60,7 @@ namespace DimitriVranken.PanoramaCreator
         public bool NoCamera { get; set; }
 
         [Option("no-merge", DefaultValue = false,
-            HelpText = "Do not merge the recorded images into a panoramic image.")]
+            HelpText = "Do not merge the recorded images into a panoramic image. Mainly used for debugging.")]
         public bool NoMerge { get; set; }
 
 
