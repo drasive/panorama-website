@@ -12,14 +12,9 @@ namespace DimitriVranken.PanoramaCreator
     /// </summary>
     class CurvedImageStitcher : ImageStitcher
     {
-        private static Bitmap MergeImages(Image image1, Image image2, int offset = 0)
+        private static Bitmap MergeImages(Image image1, Image image2)
         {
-            if (offset < -image1.Width)
-            {
-                throw new ArgumentOutOfRangeException("offset");
-            }
-
-            var mergedWidth = image1.Width + image2.Width + offset;
+            var mergedWidth = image1.Width + image2.Width;
             var mergedHeight = image1.Height > image2.Height
                 ? image1.Height
                 : image2.Height;
@@ -30,7 +25,7 @@ namespace DimitriVranken.PanoramaCreator
                 graphics.DrawImage(image1, new Rectangle(0, 0, image1.Width, image1.Height));
 
                 // Draw image 2 at the right border of image 1
-                graphics.DrawImage(image2, new Rectangle(image1.Width + offset, 0, image2.Width, image2.Height));
+                graphics.DrawImage(image2, new Rectangle(image1.Width, 0, image2.Width, image2.Height));
             }
 
             return mergedImage;

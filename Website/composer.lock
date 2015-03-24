@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "ca330202a4fcb320c72088b3ec1e1cbe",
+    "hash": "28ba06b01b16375d772d371bc7a42d91",
     "packages": [
         {
             "name": "katzgrau/klogger",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/katzgrau/KLogger.git",
-                "reference": "0c51d714b9ee7bd39d9b9f52b298be10d7c824b4"
+                "reference": "d7309d0520887dc0a0bd361c4d0da0131b4614a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/katzgrau/KLogger/zipball/0c51d714b9ee7bd39d9b9f52b298be10d7c824b4",
-                "reference": "0c51d714b9ee7bd39d9b9f52b298be10d7c824b4",
+                "url": "https://api.github.com/repos/katzgrau/KLogger/zipball/d7309d0520887dc0a0bd361c4d0da0131b4614a1",
+                "reference": "d7309d0520887dc0a0bd361c4d0da0131b4614a1",
                 "shasum": ""
             },
             "require": {
@@ -54,7 +54,7 @@
             "keywords": [
                 "logging"
             ],
-            "time": "2015-03-10 18:37:03"
+            "time": "2015-03-19 20:46:58"
         },
         {
             "name": "psr/log",
@@ -102,7 +102,6 @@
         "katzgrau/klogger": 20
     },
     "prefer-stable": false,
-    "prefer-lowest": false,
     "platform": [],
     "platform-dev": []
 }

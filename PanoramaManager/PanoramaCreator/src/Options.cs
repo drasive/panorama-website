@@ -13,7 +13,6 @@ namespace DimitriVranken.PanoramaCreator
         public string IpAddress { get; set; }
         public IPAddress IpAddressParsed { get; set; }
 
-        // TODO: (Camera) Update improved default value (for curved)
         [Option('i', "image-count", DefaultValue = 4,
             HelpText = "The number of images to generate the panoramic image from.")]
         public int ImageCount { get; set; }

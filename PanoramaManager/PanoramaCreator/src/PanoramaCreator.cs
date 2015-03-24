@@ -212,8 +212,6 @@ namespace DimitriVranken.PanoramaCreator
         /// Indicates whether the images in the series should overlap (true) or not (false).</param>
         private static void RotateCamera(bool right, bool overlayImages)
         {
-            // TODO: (Networking) Perfect pan speeds
-
             var direction = right
                 ? CameraDirection.Right
                 : CameraDirection.Left;
@@ -221,7 +219,7 @@ namespace DimitriVranken.PanoramaCreator
             if (overlayImages)
             {
                 // Rotate so the images overlap a bit
-                _camera.Rotate(direction, 0);
+                _camera.Rotate(direction, 1);
             }
             else
             {

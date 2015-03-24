@@ -189,12 +189,12 @@ namespace DimitriVranken.PanoramaCreator
 
             }
 
-            var commandUrl = String.Format("camctrl.cgi?move={0}&speed={1}", directionString, speed);
+            var commandUrl = String.Format("camctrl.cgi?move={0}&speedpan={1}", directionString, speed);
 
             // Set wait time
             var waitTime = (direction == CameraDirection.Home)
-                ? (int)(4.5 * 1000)
-                : (int)(2.5 * 1000);
+                ? (int)(4.2 * 1000)
+                : (int)(2.1 * 1000);
 
             // Execute command
             Logger.UserInterface.Debug("Rotating the camera {0} with speed {1}", direction.ToString().ToLower(), speed);
